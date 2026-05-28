@@ -12,4 +12,13 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+
+  // Force-enable Nitro with the node-server preset so `npm run build`
+  // produces a standalone Node.js HTTP server in dist/server/server.js.
+  // Without this, the Lovable plugin defaults to "cloudflare-module" which
+  // exports a Web-API fetch() handler that exits immediately on Node.js.
+  nitro: {
+    preset: "node-server",
+  },
 });
+
