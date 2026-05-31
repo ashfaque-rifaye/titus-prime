@@ -16,13 +16,36 @@
  */
 import { bus } from "./event-bus";
 import { evaluate, loadPolicy } from "./policy";
-import type { AgentEvent, ProposedAction } from "./types";
+import type { ProposedAction } from "./types";
 import { runTreasury, buildTreasuryActions } from "./specialist/treasury";
 import { runCollection, buildCollectionActions } from "./specialist/collection";
 import { runSubscription, buildSubscriptionActions } from "./specialist/subscription";
 import { runTax, buildTaxActions } from "./specialist/tax";
 import { runScenario, buildScenarioActions } from "./specialist/scenario";
 import { supabaseAdmin } from "../supabase-admin.server";
+import { recordValueOnce, type ValueCategory } from "../value/ledger.server";
+import { recordOutcome } from "../value/outcomes.server";
+
+/** Map an action type to a value category + estimated manual minutes it replaces. */
+function valueForAction(a: ProposedAction): { category: ValueCategory; minutes: number } | null {
+  switch (a.type) {
+    case "execute_plan":
+      return { category: "protected", minutes: 90 }; // survival plan = hours of CFO firefighting
+    case "send_email":
+      return { category: "recovered", minutes: 12 }; // each chased invoice
+    case "cancel_subscription":
+    case "pause_subscription":
+      return { category: "saved", minutes: 20 };
+    case "pay_vendor":
+      return { category: "saved", minutes: 10 }; // early-pay discount captured
+    case "file_tax_return":
+      return { category: "protected", minutes: 120 }; // avoided penalty + manual filing
+    case "delay_payment":
+      return { category: "protected", minutes: 15 };
+    default:
+      return null;
+  }
+}
 
 export type RunMode = "stream" | "template";
 export type RunOptions = { mode?: RunMode; intent?: string };
@@ -60,7 +83,14 @@ export async function runOrchestrator(opts: RunOptions = {}): Promise<RunSummary
 
   try {
     // Step 1: Treasury — always first.
-    bus.emit({ kind: "agent.thought", runId, ts: Date.now(), agent: "orchestrator", severity: "info", text: "Dispatching Treasury Sentinel." });
+    bus.emit({
+      kind: "agent.thought",
+      runId,
+      ts: Date.now(),
+      agent: "orchestrator",
+      severity: "info",
+      text: "Dispatching Treasury Sentinel.",
+    });
     const treasury = await runTreasury({ runId, mode });
     agentsExecuted.push("treasury");
     allActions.push(...buildTreasuryActions(treasury));
@@ -115,7 +145,14 @@ export async function runOrchestrator(opts: RunOptions = {}): Promise<RunSummary
     await Promise.all(tasks);
 
     // Step 3: Policy Envelope — every action gets evaluated.
-    bus.emit({ kind: "agent.thought", runId, ts: Date.now(), agent: "orchestrator", severity: "info", text: `Evaluating ${allActions.length} proposed actions against the policy envelope.` });
+    bus.emit({
+      kind: "agent.thought",
+      runId,
+      ts: Date.now(),
+      agent: "orchestrator",
+      severity: "info",
+      text: `Evaluating ${allActions.length} proposed actions against the policy envelope.`,
+    });
     const policy = await loadPolicy();
     let auto = 0;
     let queued = 0;
@@ -130,6 +167,37 @@ export async function runOrchestrator(opts: RunOptions = {}): Promise<RunSummary
         ruleHit: decision.ruleHit,
         decision: decision.decision,
       });
+
+      // Record the projected value this action represents (de-duped by ref+label).
+      const v = valueForAction(action);
+      if (v) {
+        await recordValueOnce({
+          agent: action.agent,
+          category: v.category,
+          amountUsd: action.amountUsd ?? 0,
+          minutesSaved: v.minutes,
+          label: action.title,
+          runId,
+          status: "projected",
+          ref:
+            (action.metadata?.invoiceId as string) ??
+            (action.metadata?.subId as string) ??
+            action.title,
+        });
+      }
+
+      // Outcome tracking — collection emails get a pending outcome so the
+      // recovery-rate loop is grounded in real sends, not just projections.
+      if (action.type === "send_email") {
+        const ref = (action.metadata?.invoiceId as string) ?? action.title;
+        recordOutcome({
+          kind: "collection_reminder",
+          ref,
+          label: action.title,
+          amountUsd: action.amountUsd ?? 0,
+        });
+      }
+
       if (decision.decision === "auto") {
         auto++;
       } else {

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "motion/react";
 import { SKILL_TEMPLATES, type SkillKey } from "@/lib/skill-templates";
 import { commitSkill } from "@/lib/skills-store";
 import { toast } from "sonner";
+import { Code2 as Code2Icon } from "lucide-react";
 
 export type WorkshopJob = {
   skillKey: SkillKey;
@@ -94,7 +95,10 @@ export function Workshop({
             if (line.endsWith("\r")) line = line.slice(0, -1);
             if (!line.startsWith("data: ")) continue;
             const data = line.slice(6).trim();
-            if (data === "[DONE]") { await finish(); return; }
+            if (data === "[DONE]") {
+              await finish();
+              return;
+            }
             try {
               const parsed = JSON.parse(data);
               const delta = parsed.choices?.[0]?.delta?.content;
@@ -115,7 +119,9 @@ export function Workshop({
     }
 
     run();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [job?.skillKey, job?.mode]);
 
@@ -126,11 +132,13 @@ export function Workshop({
   if (!job) {
     return (
       <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
-        <div className="grid h-14 w-14 place-items-center rounded-xl bg-surface text-2xl">💻</div>
+        <div className="grid h-14 w-14 place-items-center rounded-xl bg-surface text-muted-foreground">
+          <Code2Icon className="h-7 w-7" />
+        </div>
         <h3 className="text-base font-semibold">Workshop is idle</h3>
         <p className="max-w-sm text-sm text-muted-foreground">
-          Click any number, alert, or <span className="mono accent-text">provenance:</span> badge in the Boardroom.
-          Codex Prime will write the Python that produced it — token by token.
+          Click any number, alert, or <span className="mono accent-text">provenance:</span> badge in
+          the Boardroom. Codex Prime will write the Python that produced it — token by token.
         </p>
       </div>
     );
@@ -143,21 +151,33 @@ export function Workshop({
       <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
         <div className="min-w-0">
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span className={`h-1.5 w-1.5 rounded-full ${running ? "bg-amber-400 pulse-dot" : done ? "bg-emerald-400" : "bg-muted-foreground"}`} />
+            <span
+              className={`h-1.5 w-1.5 rounded-full ${running ? "bg-amber-400 pulse-dot" : done ? "bg-emerald-400" : "bg-muted-foreground"}`}
+            />
             <span className="mono">codex-prime</span>
             <span>·</span>
             <span>{job.agent}</span>
             <span>·</span>
-            <span className="mono truncate">{tpl.agent}/{tpl.name}.py</span>
+            <span className="mono truncate">
+              {tpl.agent}/{tpl.name}.py
+            </span>
           </div>
           <div className="mt-0.5 text-xs text-muted-foreground/80 truncate">{job.intent}</div>
         </div>
         {onClose && (
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xs px-2 py-1 rounded hover:bg-secondary">close</button>
+          <button
+            onClick={onClose}
+            className="text-muted-foreground hover:text-foreground text-xs px-2 py-1 rounded hover:bg-secondary"
+          >
+            close
+          </button>
         )}
       </div>
       <div className="relative flex-1 overflow-hidden bg-background/40">
-        <pre ref={preRef} className="mono h-full overflow-auto p-4 text-[12.5px] leading-relaxed scrollbar-thin">
+        <pre
+          ref={preRef}
+          className="mono h-full overflow-auto p-4 text-[12.5px] leading-relaxed scrollbar-thin"
+        >
           <code className="text-foreground/90">{output}</code>
           {running && <span className="caret" />}
         </pre>
@@ -180,9 +200,16 @@ export function Workshop({
             <span className="text-muted-foreground">stdout:</span>
             <span className="mono accent-text">{tpl.outputSummary}</span>
             <span className="text-muted-foreground">·</span>
-            <span className="text-muted-foreground">duration <span className="text-foreground">{tpl.durationMs}ms</span></span>
+            <span className="text-muted-foreground">
+              duration <span className="text-foreground">{tpl.durationMs}ms</span>
+            </span>
             <span className="text-muted-foreground">·</span>
-            <span className="text-muted-foreground">committed <span className="mono text-foreground">workspace/skills/{tpl.agent}/{tpl.name}.py</span></span>
+            <span className="text-muted-foreground">
+              committed{" "}
+              <span className="mono text-foreground">
+                workspace/skills/{tpl.agent}/{tpl.name}.py
+              </span>
+            </span>
           </div>
         </div>
       )}

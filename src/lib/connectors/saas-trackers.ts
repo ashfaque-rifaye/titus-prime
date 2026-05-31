@@ -121,9 +121,15 @@ export class GmailConnector extends CommsConnectorBase implements Connector {
   readonly icon = "✉️";
   readonly description = "Inbox parsing for invoices, renewals, vendor emails.";
   readonly regions = ["US", "IN", "Global"] as const;
-  constructor() { super(STACK.filter((s) => s.source === "gmail")); }
-  isReal() { return false; }
-  isConfigured() { return Boolean(process.env.GMAIL_TOKEN); }
+  constructor() {
+    super(STACK.filter((s) => s.source === "gmail"));
+  }
+  isReal() {
+    return false;
+  }
+  isConfigured() {
+    return Boolean(process.env.GMAIL_TOKEN);
+  }
 }
 
 export class OutlookConnector extends CommsConnectorBase implements Connector {
@@ -133,9 +139,15 @@ export class OutlookConnector extends CommsConnectorBase implements Connector {
   readonly icon = "📧";
   readonly description = "Microsoft 365 inbox + calendar invoice signals.";
   readonly regions = ["US", "IN", "Global"] as const;
-  constructor() { super(STACK.filter((s) => s.source === "outlook")); }
-  isReal() { return false; }
-  isConfigured() { return Boolean(process.env.OUTLOOK_TOKEN); }
+  constructor() {
+    super(STACK.filter((s) => s.source === "outlook"));
+  }
+  isReal() {
+    return false;
+  }
+  isConfigured() {
+    return Boolean(process.env.OUTLOOK_TOKEN);
+  }
 }
 
 export class SlackConnector extends CommsConnectorBase implements Connector {
@@ -145,9 +157,15 @@ export class SlackConnector extends CommsConnectorBase implements Connector {
   readonly icon = "💬";
   readonly description = "Approvals + alerts pushed to your finance channel.";
   readonly regions = ["US", "IN", "Global"] as const;
-  constructor() { super(STACK.filter((s) => s.source === "slack")); }
-  isReal() { return false; }
-  isConfigured() { return Boolean(process.env.SLACK_BOT_TOKEN); }
+  constructor() {
+    super(STACK.filter((s) => s.source === "slack"));
+  }
+  isReal() {
+    return false;
+  }
+  isConfigured() {
+    return Boolean(process.env.SLACK_BOT_TOKEN);
+  }
 }
 
 export class TeamsConnector extends CommsConnectorBase implements Connector {
@@ -157,7 +175,13 @@ export class TeamsConnector extends CommsConnectorBase implements Connector {
   readonly icon = "🟪";
   readonly description = "Enterprise approval channels, Loop component pings.";
   readonly regions = ["US", "IN", "Global"] as const;
-  constructor() { super(STACK.filter((s) => s.source === "teams")); }
-  isReal() { return false; }
-  isConfigured() { return Boolean(process.env.TEAMS_TOKEN); }
+  constructor() {
+    super(STACK.filter((s) => s.source === "teams"));
+  }
+  isReal() {
+    return false;
+  }
+  isConfigured() {
+    return Boolean(process.env.TEAMS_TOKEN);
+  }
 }

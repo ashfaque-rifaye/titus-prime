@@ -10,6 +10,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import type { AgentEvent } from "@/lib/agents/types";
 import { Badge } from "@/components/ui/badge";
+import { Brain, Sliders, Mail, Calendar, FileText, Trophy, Code2, Radio } from "lucide-react";
 
 const AGENT_LABEL: Record<string, string> = {
   orchestrator: "Orchestrator",
@@ -20,14 +21,14 @@ const AGENT_LABEL: Record<string, string> = {
   scenario: "Scenario Modeler",
   codex: "Codex Prime",
 };
-const AGENT_ICON: Record<string, string> = {
-  orchestrator: "🧠",
-  treasury: "🔭",
-  collection: "📨",
-  subscription: "📋",
-  tax: "🏛️",
-  scenario: "📊",
-  codex: "💻",
+const AGENT_ICON: Record<string, React.ReactNode> = {
+  orchestrator: <Brain className="h-3.5 w-3.5 inline-block" />,
+  treasury: <Sliders className="h-3.5 w-3.5 inline-block" />,
+  collection: <Mail className="h-3.5 w-3.5 inline-block" />,
+  subscription: <Calendar className="h-3.5 w-3.5 inline-block" />,
+  tax: <FileText className="h-3.5 w-3.5 inline-block" />,
+  scenario: <Trophy className="h-3.5 w-3.5 inline-block" />,
+  codex: <Code2 className="h-3.5 w-3.5 inline-block" />,
 };
 
 type Props = {
@@ -42,7 +43,13 @@ type Props = {
   registerStarter?: (start: () => void) => void;
 };
 
-export function AgentConsole({ mode, onCodexToken, onRunStarted, onRunCompleted, registerStarter }: Props) {
+export function AgentConsole({
+  mode,
+  onCodexToken,
+  onRunStarted,
+  onRunCompleted,
+  registerStarter,
+}: Props) {
   const [events, setEvents] = useState<AgentEvent[]>([]);
   const [running, setRunning] = useState(false);
   const [progress, setProgress] = useState({ done: 0, total: 5 });
@@ -88,7 +95,6 @@ export function AgentConsole({ mode, onCodexToken, onRunStarted, onRunCompleted,
       }
     } catch (e) {
       if (!ac.signal.aborted) {
-        // eslint-disable-next-line no-console
         console.error("[AgentConsole] stream error", e);
       }
     } finally {
@@ -129,7 +135,9 @@ export function AgentConsole({ mode, onCodexToken, onRunStarted, onRunCompleted,
     <div className="rounded-xl border border-border bg-surface/60 overflow-hidden flex flex-col">
       <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
         <div className="flex items-center gap-2">
-          <span className={`h-1.5 w-1.5 rounded-full ${running ? "bg-amber-400 pulse-dot" : "bg-muted-foreground"}`} />
+          <span
+            className={`h-1.5 w-1.5 rounded-full ${running ? "bg-amber-400 pulse-dot" : "bg-muted-foreground"}`}
+          />
           <h3 className="text-sm font-semibold">Agent Console</h3>
           {events.length > 0 && (
             <span className="text-[11px] text-muted-foreground mono">{events.length} events</span>
@@ -149,7 +157,9 @@ export function AgentConsole({ mode, onCodexToken, onRunStarted, onRunCompleted,
           <button
             onClick={running ? () => aborter.current?.abort() : start}
             className={`rounded-md px-3 py-1 text-xs font-semibold transition ${
-              running ? "border border-border text-muted-foreground" : "bg-primary text-primary-foreground hover:opacity-90"
+              running
+                ? "border border-border text-muted-foreground"
+                : "bg-primary text-primary-foreground hover:opacity-90"
             }`}
           >
             {running ? "Stop" : "Run agents →"}
@@ -159,8 +169,9 @@ export function AgentConsole({ mode, onCodexToken, onRunStarted, onRunCompleted,
       <div ref={scrollRef} className="max-h-[360px] overflow-auto scrollbar-thin p-3 space-y-1.5">
         {events.length === 0 && !running && (
           <p className="text-xs text-muted-foreground py-4 text-center">
-            Click <span className="accent-text">Run agents</span> to start an orchestrated sweep. Treasury runs first.
-            If a crunch is detected, Collection / Subscription / Scenario coordinate in real time.
+            Click <span className="accent-text">Run agents</span> to start an orchestrated sweep.
+            Treasury runs first. If a crunch is detected, Collection / Subscription / Scenario
+            coordinate in real time.
           </p>
         )}
         <AnimatePresence initial={false}>
@@ -195,7 +206,9 @@ function Body({ e }: { e: AgentEvent }) {
   if (e.kind === "run.started") {
     return (
       <span className="text-foreground">
-        <Badge variant="outline" className="mr-2">RUN</Badge>
+        <Badge variant="outline" className="mr-2">
+          RUN
+        </Badge>
         {e.intent} · <span className="mono accent-text">{e.runId}</span>
       </span>
     );
@@ -203,7 +216,9 @@ function Body({ e }: { e: AgentEvent }) {
   if (e.kind === "run.completed") {
     return (
       <span>
-        <Badge className="mr-2 bg-emerald-500/20 text-emerald-300 border-emerald-500/30">DONE</Badge>
+        <Badge className="mr-2 bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
+          DONE
+        </Badge>
         {e.summary}
       </span>
     );
@@ -228,9 +243,13 @@ function Body({ e }: { e: AgentEvent }) {
   }
   if (e.kind === "agent.message") {
     return (
-      <span className="text-amber-300">
-        <span className="mr-1.5">📡</span>
-        <span className="mono">{e.from} → {e.to}</span>
+      <span className="text-amber-300 inline-flex items-center">
+        <span className="mr-1.5">
+          <Radio className="h-3.5 w-3.5" />
+        </span>
+        <span className="mono">
+          {e.from} → {e.to}
+        </span>
         <span className="mx-1.5">·</span>
         <span className="text-foreground">{e.subject}</span>
       </span>
@@ -238,10 +257,13 @@ function Body({ e }: { e: AgentEvent }) {
   }
   if (e.kind === "agent.finding") {
     const color =
-      e.severity === "alert" ? "bg-rose-500/20 text-rose-300 border-rose-500/30"
-      : e.severity === "warn" ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
-      : e.severity === "success" ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
-      : "bg-sky-500/20 text-sky-300 border-sky-500/30";
+      e.severity === "alert"
+        ? "bg-rose-500/20 text-rose-300 border-rose-500/30"
+        : e.severity === "warn"
+          ? "bg-amber-500/20 text-amber-300 border-amber-500/30"
+          : e.severity === "success"
+            ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30"
+            : "bg-sky-500/20 text-sky-300 border-sky-500/30";
     return (
       <span>
         <Badge className={`mr-2 ${color}`}>{e.severity.toUpperCase()}</Badge>
@@ -253,8 +275,10 @@ function Body({ e }: { e: AgentEvent }) {
   }
   if (e.kind === "codex.skill_request") {
     return (
-      <span className="text-muted-foreground">
-        <span className="mr-1.5">💻</span>
+      <span className="text-muted-foreground inline-flex items-center">
+        <span className="mr-1.5">
+          <Code2 className="h-3.5 w-3.5" />
+        </span>
         <span className="mono accent-text">codex.{e.skillKey}</span>
         <span className="mx-1.5">·</span>
         requested by {AGENT_LABEL[e.from]}
@@ -262,11 +286,13 @@ function Body({ e }: { e: AgentEvent }) {
     );
   }
   if (e.kind === "codex.skill_committed") {
-    const engineColor = e.engine.startsWith("gemini") ? "text-emerald-300" : e.engine.startsWith("groq") ? "text-amber-300" : "text-sky-300";
+    const engineColor = e.engine.startsWith("codex") ? "text-sky-300" : "text-emerald-300";
     return (
       <span>
         <Badge className="mr-2 bg-primary/20 accent-text border-primary/30">COMMIT</Badge>
-        <span className="mono">{e.skillKey}_v{e.version}.py</span>
+        <span className="mono">
+          {e.skillKey}_v{e.version}.py
+        </span>
         <span className="mx-1.5 text-muted-foreground">·</span>
         <span className="text-muted-foreground">{e.durationMs}ms · </span>
         <span className={`mono ${engineColor}`}>{e.engine}</span>
@@ -276,7 +302,9 @@ function Body({ e }: { e: AgentEvent }) {
   if (e.kind === "policy.decision") {
     return (
       <span>
-        <Badge className={`mr-2 ${e.decision === "auto" ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-amber-500/20 text-amber-300 border-amber-500/30"}`}>
+        <Badge
+          className={`mr-2 ${e.decision === "auto" ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-amber-500/20 text-amber-300 border-amber-500/30"}`}
+        >
           {e.decision === "auto" ? "AUTO" : "QUEUE"}
         </Badge>
         <span className="text-foreground/90">{e.action}</span>

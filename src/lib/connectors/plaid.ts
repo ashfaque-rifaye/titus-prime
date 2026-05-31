@@ -44,7 +44,6 @@ export class PlaidConnector implements Connector {
         const real = await this.realSync();
         if (real) return real;
       } catch (e) {
-        // eslint-disable-next-line no-console
         console.warn("[plaid] real sandbox sync failed, using fixtures:", (e as Error).message);
       }
     }
@@ -91,7 +90,10 @@ export class PlaidConnector implements Connector {
     });
     if (!balResp.ok) return null;
     const balJson = (await balResp.json()) as {
-      accounts: Array<{ name: string; balances: { available: number | null; current: number | null; iso_currency_code: string } }>;
+      accounts: Array<{
+        name: string;
+        balances: { available: number | null; current: number | null; iso_currency_code: string };
+      }>;
     };
 
     const banks: CanonicalBankBalance[] = balJson.accounts

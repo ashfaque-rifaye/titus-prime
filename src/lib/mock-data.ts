@@ -21,12 +21,60 @@ export type Invoice = {
 };
 
 export const INVOICES: Invoice[] = [
-  { id: "INV-1042", customer: "Acme Robotics", amount: 8200, issued: "2026-04-03", due: "2026-05-03", daysLate: 14, status: "late" },
-  { id: "INV-1038", customer: "TechFlow Labs", amount: 3400, issued: "2026-04-01", due: "2026-05-01", daysLate: 16, status: "late" },
-  { id: "INV-1029", customer: "Nimbus Health", amount: 1450, issued: "2026-03-20", due: "2026-04-19", daysLate: 28, status: "very_late" },
-  { id: "INV-1025", customer: "Hexa Studios", amount: 920, issued: "2026-04-12", due: "2026-05-12", daysLate: 5, status: "late" },
-  { id: "INV-1018", customer: "Loop Analytics", amount: 6400, issued: "2026-03-25", due: "2026-04-24", daysLate: 23, status: "very_late" },
-  { id: "INV-1011", customer: "Mango Retail", amount: 2750, issued: "2026-04-15", due: "2026-05-15", daysLate: 2, status: "late" },
+  {
+    id: "INV-1042",
+    customer: "Acme Robotics",
+    amount: 8200,
+    issued: "2026-04-03",
+    due: "2026-05-03",
+    daysLate: 14,
+    status: "late",
+  },
+  {
+    id: "INV-1038",
+    customer: "TechFlow Labs",
+    amount: 3400,
+    issued: "2026-04-01",
+    due: "2026-05-01",
+    daysLate: 16,
+    status: "late",
+  },
+  {
+    id: "INV-1029",
+    customer: "Nimbus Health",
+    amount: 1450,
+    issued: "2026-03-20",
+    due: "2026-04-19",
+    daysLate: 28,
+    status: "very_late",
+  },
+  {
+    id: "INV-1025",
+    customer: "Hexa Studios",
+    amount: 920,
+    issued: "2026-04-12",
+    due: "2026-05-12",
+    daysLate: 5,
+    status: "late",
+  },
+  {
+    id: "INV-1018",
+    customer: "Loop Analytics",
+    amount: 6400,
+    issued: "2026-03-25",
+    due: "2026-04-24",
+    daysLate: 23,
+    status: "very_late",
+  },
+  {
+    id: "INV-1011",
+    customer: "Mango Retail",
+    amount: 2750,
+    issued: "2026-04-15",
+    due: "2026-05-15",
+    daysLate: 2,
+    status: "late",
+  },
 ];
 
 export type Subscription = {
@@ -41,25 +89,109 @@ export type Subscription = {
 };
 
 export const SUBSCRIPTIONS: Subscription[] = [
-  { id: "sub-1", vendor: "Slack Enterprise", annualCost: 14400, monthlyCost: 1200, renewsIn: 8, cancelWindowClosesIn: 2, essential: false, notes: "Mostly duplicates Teams" },
-  { id: "sub-2", vendor: "AWS Reserved", annualCost: 38000, monthlyCost: 3170, renewsIn: 42, cancelWindowClosesIn: 12, essential: true, notes: "+12% escalation July 1" },
-  { id: "sub-3", vendor: "Notion Team", annualCost: 2880, monthlyCost: 240, renewsIn: 19, cancelWindowClosesIn: 5, essential: false },
-  { id: "sub-4", vendor: "Datadog", annualCost: 9600, monthlyCost: 800, renewsIn: 60, cancelWindowClosesIn: 30, essential: true },
-  { id: "sub-5", vendor: "Linear", annualCost: 1440, monthlyCost: 120, renewsIn: 90, cancelWindowClosesIn: 60, essential: true },
+  {
+    id: "sub-1",
+    vendor: "Slack Enterprise",
+    annualCost: 14400,
+    monthlyCost: 1200,
+    renewsIn: 8,
+    cancelWindowClosesIn: 2,
+    essential: false,
+    notes: "Mostly duplicates Teams",
+  },
+  {
+    id: "sub-2",
+    vendor: "AWS Reserved",
+    annualCost: 38000,
+    monthlyCost: 3170,
+    renewsIn: 42,
+    cancelWindowClosesIn: 12,
+    essential: true,
+    notes: "+12% escalation July 1",
+  },
+  {
+    id: "sub-3",
+    vendor: "Notion Team",
+    annualCost: 2880,
+    monthlyCost: 240,
+    renewsIn: 19,
+    cancelWindowClosesIn: 5,
+    essential: false,
+  },
+  {
+    id: "sub-4",
+    vendor: "Datadog",
+    annualCost: 9600,
+    monthlyCost: 800,
+    renewsIn: 60,
+    cancelWindowClosesIn: 30,
+    essential: true,
+  },
+  {
+    id: "sub-5",
+    vendor: "Linear",
+    annualCost: 1440,
+    monthlyCost: 120,
+    renewsIn: 90,
+    cancelWindowClosesIn: 60,
+    essential: true,
+  },
 ];
 
-export type Vendor = { id: string; name: string; amount: number; netDays: number; daysLeft: number; discountPct: number };
+export type Vendor = {
+  id: string;
+  name: string;
+  amount: number;
+  netDays: number;
+  daysLeft: number;
+  discountPct: number;
+};
 export const VENDORS: Vendor[] = [
   { id: "v1", name: "Acme Cloud Hosting", amount: 6200, netDays: 30, daysLeft: 6, discountPct: 2 },
   { id: "v2", name: "Twilio Comms", amount: 1800, netDays: 30, daysLeft: 14, discountPct: 0 },
 ];
 
-export type StateRevenue = { state: string; revenueYTD: number; transactions: number; threshold: number; nexusCrossed: boolean; taxOwed: number };
+export type StateRevenue = {
+  state: string;
+  revenueYTD: number;
+  transactions: number;
+  threshold: number;
+  nexusCrossed: boolean;
+  taxOwed: number;
+};
 export const STATE_REVENUE: StateRevenue[] = [
-  { state: "CA", revenueYTD: 84_300, transactions: 142, threshold: 500_000, nexusCrossed: false, taxOwed: 0 },
-  { state: "TX", revenueYTD: 100_200, transactions: 168, threshold: 100_000, nexusCrossed: true, taxOwed: 1420.5 },
-  { state: "NY", revenueYTD: 62_800, transactions: 88, threshold: 500_000, nexusCrossed: false, taxOwed: 0 },
-  { state: "FL", revenueYTD: 47_900, transactions: 71, threshold: 100_000, nexusCrossed: false, taxOwed: 0 },
+  {
+    state: "CA",
+    revenueYTD: 84_300,
+    transactions: 142,
+    threshold: 500_000,
+    nexusCrossed: false,
+    taxOwed: 0,
+  },
+  {
+    state: "TX",
+    revenueYTD: 100_200,
+    transactions: 168,
+    threshold: 100_000,
+    nexusCrossed: true,
+    taxOwed: 1420.5,
+  },
+  {
+    state: "NY",
+    revenueYTD: 62_800,
+    transactions: 88,
+    threshold: 500_000,
+    nexusCrossed: false,
+    taxOwed: 0,
+  },
+  {
+    state: "FL",
+    revenueYTD: 47_900,
+    transactions: 71,
+    threshold: 100_000,
+    nexusCrossed: false,
+    taxOwed: 0,
+  },
 ];
 
 export const PAYROLL = { amount: 22_000, day: 15 };
@@ -91,11 +223,26 @@ export const CASH_PROJECTION = (() => {
 })();
 
 export const AGENTS = [
-  { id: "treasury", name: "Treasury Sentinel", icon: "🔭", folder: "treasury", tone: "Watches your cash position 24/7." },
-  { id: "collection", name: "Collection & Receivables", icon: "📨", folder: "collection", tone: "Drafts tone-aware reminders." },
-  { id: "subscription", name: "Subscription & Vendor Watchdog", icon: "📋", folder: "subscription", tone: "Catches every renewal." },
-  { id: "tax", name: "Tax Compliance", icon: "🏛️", folder: "tax", tone: "Multi-state SaaS nexus." },
-  { id: "scenario", name: "Scenario Modeler", icon: "📊", folder: "scenario", tone: "Ranks survival plans." },
-  { id: "codex", name: "Codex Prime", icon: "💻", folder: "codex", tone: "Writes the code, every time." },
+  {
+    id: "treasury",
+    name: "Treasury Sentinel",
+    folder: "treasury",
+    tone: "Watches your cash position 24/7.",
+  },
+  {
+    id: "collection",
+    name: "Collection & Receivables",
+    folder: "collection",
+    tone: "Drafts tone-aware reminders.",
+  },
+  {
+    id: "subscription",
+    name: "Subscription & Vendor Watchdog",
+    folder: "subscription",
+    tone: "Catches every renewal.",
+  },
+  { id: "tax", name: "Tax Compliance", folder: "tax", tone: "Multi-state SaaS nexus." },
+  { id: "scenario", name: "Scenario Modeler", folder: "scenario", tone: "Ranks survival plans." },
+  { id: "codex", name: "Codex Prime", folder: "codex", tone: "Writes the code, every time." },
 ] as const;
 export type AgentId = (typeof AGENTS)[number]["id"];

@@ -125,12 +125,18 @@ Answer now in strict JSON.`;
           });
 
           // Strip code fences if the model adds them.
-          let stripped = raw.replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
+          const stripped = raw
+            .replace(/^```json\s*/i, "")
+            .replace(/^```\s*/i, "")
+            .replace(/```\s*$/i, "")
+            .trim();
 
           // Robust extractor: find the largest valid JSON object that looks
           // like our wrapper { answer, highlights, citedFigures }, even if
           // the model wrapped it inside another string.
-          function extractWrapper(s: string): { answer: string; highlights: any; citedFigures: any } | null {
+          function extractWrapper(
+            s: string,
+          ): { answer: string; highlights: any; citedFigures: any } | null {
             // First try direct parse.
             try {
               const obj = JSON.parse(s);
@@ -142,7 +148,9 @@ Answer now in strict JSON.`;
                 }
                 return obj;
               }
-            } catch { /* fall through */ }
+            } catch {
+              /* fall through */
+            }
             // Look for the FIRST balanced JSON object containing "answer":
             const start = s.indexOf("{");
             if (start < 0) return null;
@@ -151,8 +159,14 @@ Answer now in strict JSON.`;
             let escape = false;
             for (let i = start; i < s.length; i++) {
               const ch = s[i];
-              if (escape) { escape = false; continue; }
-              if (ch === "\\") { escape = true; continue; }
+              if (escape) {
+                escape = false;
+                continue;
+              }
+              if (ch === "\\") {
+                escape = true;
+                continue;
+              }
               if (ch === '"') inStr = !inStr;
               if (inStr) continue;
               if (ch === "{") depth++;
@@ -162,8 +176,11 @@ Answer now in strict JSON.`;
                   const candidate = s.slice(start, i + 1);
                   try {
                     const obj = JSON.parse(candidate);
-                    if (obj && typeof obj === "object" && typeof obj.answer === "string") return obj;
-                  } catch { /* try next */ }
+                    if (obj && typeof obj === "object" && typeof obj.answer === "string")
+                      return obj;
+                  } catch {
+                    /* try next */
+                  }
                 }
               }
             }
@@ -171,7 +188,11 @@ Answer now in strict JSON.`;
           }
 
           const unwrapped = extractWrapper(stripped);
-          let parsed: { answer: string; highlights: string[] | string; citedFigures: Array<{ label: string; value: string }> | string };
+          let parsed: {
+            answer: string;
+            highlights: string[] | string;
+            citedFigures: Array<{ label: string; value: string }> | string;
+          };
           if (unwrapped) {
             parsed = unwrapped;
           } else {
@@ -188,7 +209,8 @@ Answer now in strict JSON.`;
 
           return new Response(
             JSON.stringify({
-              answer: typeof parsed.answer === "string" ? parsed.answer : String(parsed.answer ?? ""),
+              answer:
+                typeof parsed.answer === "string" ? parsed.answer : String(parsed.answer ?? ""),
               highlights,
               citedFigures,
               engine: active,

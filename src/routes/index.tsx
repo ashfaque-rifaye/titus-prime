@@ -1,133 +1,281 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { COMPANY, AGENTS } from "@/lib/mock-data";
+import {
+  Telescope,
+  Mail,
+  ClipboardList,
+  Landmark,
+  BarChart3,
+  Code2,
+  ArrowRight,
+  TrendingDown,
+  Clock,
+  AlertTriangle,
+  ShieldCheck,
+  Plug,
+  GitBranch,
+  Sparkles,
+} from "lucide-react";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Titus-Prime · Your autonomous CFO" },
-      { name: "description", content: "Titus-Prime is an autonomous, multi-agent CFO that writes its own Python skills to run treasury, AR, subscriptions, tax and scenario planning." },
+      { title: "Titus-Prime · The Autonomous CFO" },
+      {
+        name: "description",
+        content:
+          "Titus-Prime is an autonomous financial operations agent. It connects your stack, predicts cash crunches, and coordinates six specialist agents to keep you solvent.",
+      },
     ],
   }),
-  component: Index,
+  component: Landing,
 });
 
-function Index() {
+const AGENTS = [
+  { name: "Treasury Sentinel", tone: "Predicts cash crunches 2–4 weeks out.", Icon: Telescope },
+  { name: "Collection Agent", tone: "Chases overdue invoices, tone-aware.", Icon: Mail },
+  {
+    name: "Subscription Watchdog",
+    tone: "Kills silent renewals & price creep.",
+    Icon: ClipboardList,
+  },
+  { name: "Tax Compliance", tone: "Tracks nexus across US states & GST.", Icon: Landmark },
+  { name: "Scenario Modeler", tone: "Ranks survival plans under pressure.", Icon: BarChart3 },
+  { name: "Codex Prime", tone: "Writes custom Python for every problem.", Icon: Code2 },
+];
+
+const PAINS = [
+  {
+    Icon: Clock,
+    stat: "12 hrs",
+    label: "lost monthly to manual finance ops",
+    tone: "amber" as const,
+  },
+  {
+    Icon: TrendingDown,
+    stat: "1 in 3",
+    label: "SaaS startups die from cash mismanagement",
+    tone: "rose" as const,
+  },
+  {
+    Icon: AlertTriangle,
+    stat: "$50k+",
+    label: "leaked yearly to silent renewals & late fees",
+    tone: "rose" as const,
+  },
+];
+
+const VALUE = [
+  {
+    stat: "+$54,965",
+    label: "cash recovered per crunch, autopilot vs. standby",
+    tone: "primary" as const,
+  },
+  {
+    stat: "18 days",
+    label: "median early warning before a shortfall hits",
+    tone: "primary" as const,
+  },
+  { stat: "4 min", label: "to review a full sweep — down from 12 hours", tone: "primary" as const },
+];
+
+const STEPS = [
+  {
+    Icon: Plug,
+    title: "Connect",
+    body: "Stripe, Salesforce, Gmail, Plaid, QuickBooks, Razorpay & more — synced into one canonical ledger.",
+  },
+  {
+    Icon: Sparkles,
+    title: "Detect",
+    body: "Treasury Sentinel projects 30 days of cash and flags the breach before it happens.",
+  },
+  {
+    Icon: GitBranch,
+    title: "Coordinate",
+    body: "A crunch escalates across agents — collections, subscriptions, and scenarios react in lockstep.",
+  },
+  {
+    Icon: ShieldCheck,
+    title: "Approve",
+    body: "Inside your policy envelope it acts autonomously; outside it, you get one clean approval queue.",
+  },
+];
+
+const toneText: Record<"primary" | "amber" | "rose", string> = {
+  primary: "accent-text",
+  amber: "text-amber-300",
+  rose: "text-rose-300",
+};
+
+function Landing() {
   return (
-    <div className="relative">
-      <section className="relative overflow-hidden">
-        <div className="absolute inset-0 terminal-grid opacity-[0.08]" />
-        <div className="absolute inset-0 ambient-glow opacity-70" />
-        <div className="relative mx-auto max-w-[1400px] px-6 pt-20 pb-24 sm:pt-28 sm:pb-32">
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/70 px-3 py-1 text-xs mono text-muted-foreground backdrop-blur"
-          >
+    <div className="relative overflow-hidden">
+      {/* Ambient background glow */}
+      <div className="pointer-events-none absolute inset-0 -z-10">
+        <div className="absolute left-1/2 top-0 h-[500px] w-[900px] -translate-x-1/2 rounded-full bg-primary/10 blur-[120px]" />
+        <div className="absolute right-0 bottom-0 h-[300px] w-[400px] rounded-full bg-indigo-500/10 blur-[100px]" />
+      </div>
+
+      {/* Hero */}
+      <section className="mx-auto max-w-[1100px] px-6 pt-20 pb-14 text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface/60 px-3 py-1 text-xs text-muted-foreground mb-6">
             <span className="h-1.5 w-1.5 rounded-full bg-primary pulse-dot" />
-            Autonomous Financial Operations · multi-agent · code-writing
-          </motion.div>
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.05 }}
-            className="mt-6 text-4xl sm:text-6xl lg:text-7xl font-semibold tracking-tight leading-[1.05]"
-          >
-            Meet <span className="accent-text">Titus-Prime</span>.<br />
-            Your autonomous CFO that writes its own code.
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.15 }}
-            className="mt-6 max-w-2xl text-base sm:text-lg text-muted-foreground"
-          >
-            Five specialist agents — Treasury, Collection, Subscription, Tax, Scenario — collaborate with
-            <span className="accent-text"> Codex Prime</span>, a shared coding agent that inspects your data, writes
-            Python, runs it in a sandbox, and commits the skill to a versioned library. Every number on screen carries
-            a <span className="mono accent-text">provenance:</span> trail back to the file that produced it.
-          </motion.p>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="mt-8 flex flex-wrap gap-3"
-          >
-            <Link to="/app" className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">
-              Enter the Boardroom →
+            Autonomous financial operations · Built for US & India SaaS
+          </div>
+          <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-[1.05]">
+            Your finance team is a<br />
+            <span className="accent-text">codebase that writes itself.</span>
+          </h1>
+          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
+            Titus-Prime is an autonomous CFO. It connects your financial stack, predicts cash
+            crunches weeks ahead, and coordinates six specialist agents to keep you solvent —
+            writing custom Python for every problem.
+          </p>
+          <div className="mt-8 flex items-center justify-center gap-3 flex-wrap">
+            <Link
+              to="/app"
+              className="inline-flex items-center justify-center gap-1.5 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 transition"
+            >
+              Open the Boardroom <ArrowRight className="h-4 w-4" />
             </Link>
-            <Link to="/architecture" className="inline-flex items-center gap-2 rounded-md border border-border bg-surface/60 px-5 py-2.5 text-sm hover:border-primary/40 transition">
-              See the architecture
+            <Link
+              to="/skills"
+              className="inline-flex items-center justify-center rounded-md border border-border bg-surface/60 px-6 py-3 text-sm font-semibold hover:border-primary/40 transition"
+            >
+              See the code it writes
             </Link>
-          </motion.div>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.4 }}
-            className="mt-14 grid gap-4 sm:grid-cols-3"
-          >
-            <Stat label="Scenario" value={COMPANY.name} sub="SaaS · $85K MRR · 200 customers" />
-            <Stat label="Crunch in" value="13 days" sub="payroll lands · cash dips below floor" tone="alert" />
-            <Stat label="Specialist agents" value="5 + Codex" sub="LangGraph orchestrated" />
-          </motion.div>
+          </div>
+        </motion.div>
+      </section>
+
+      {/* Problem band */}
+      <section className="mx-auto max-w-[1100px] px-6 pb-16">
+        <div className="text-center mb-6">
+          <span className="text-[11px] mono uppercase tracking-[0.2em] text-muted-foreground">
+            The problem
+          </span>
+          <h2 className="mt-2 text-2xl font-semibold">
+            Finance ops is reactive, manual, and expensive.
+          </h2>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-3">
+          {PAINS.map((p, i) => (
+            <motion.div
+              key={p.label}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.06 }}
+              className="rounded-xl border border-border bg-surface/60 p-5"
+            >
+              <p.Icon className={`h-5 w-5 ${toneText[p.tone]}`} />
+              <div className={`mt-3 text-3xl font-bold ${toneText[p.tone]}`}>{p.stat}</div>
+              <p className="mt-1 text-sm text-muted-foreground">{p.label}</p>
+            </motion.div>
+          ))}
         </div>
       </section>
-      <section className="border-t border-border bg-surface/30">
-        <div className="mx-auto max-w-[1400px] px-6 py-16">
-          <div className="flex items-end justify-between gap-4 flex-wrap">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">A boardroom of agents.</h2>
-              <p className="mt-2 text-muted-foreground max-w-xl text-sm sm:text-base">
-                Each agent owns a domain. None of them write code — they ask Codex Prime to. The result is a versioned
-                library of Python skills that grows with your business.
-              </p>
-            </div>
-            <Link to="/skills" className="text-sm accent-text hover:underline">workspace/skills/ →</Link>
+
+      {/* Value callouts */}
+      <section className="mx-auto max-w-[1100px] px-6 pb-16">
+        <div className="rounded-2xl border border-primary/25 bg-primary/5 p-6 sm:p-8">
+          <div className="text-center mb-6">
+            <span className="text-[11px] mono uppercase tracking-[0.2em] text-primary">
+              The outcome
+            </span>
+            <h2 className="mt-2 text-2xl font-semibold">What autonomy is worth.</h2>
           </div>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {AGENTS.map((a, i) => (
+          <div className="grid gap-6 sm:grid-cols-3">
+            {VALUE.map((v, i) => (
               <motion.div
-                key={a.id}
-                initial={{ opacity: 0, y: 12 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                key={v.label}
+                initial={{ opacity: 0, scale: 0.96 }}
+                whileInView={{ opacity: 1, scale: 1 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.05 }}
-                className="rounded-xl border border-border bg-surface/60 p-5 hover:border-primary/40 transition"
+                transition={{ duration: 0.4, delay: i * 0.06 }}
+                className="text-center"
               >
-                <div className="flex items-center gap-3">
-                  <span className="grid h-10 w-10 place-items-center rounded-lg bg-background/60 text-xl">{a.icon}</span>
-                  <div>
-                    <div className="text-sm font-semibold">{a.name}</div>
-                    <div className="text-[11px] mono text-muted-foreground">{a.folder}/</div>
-                  </div>
-                </div>
-                <p className="mt-3 text-sm text-muted-foreground">{a.tone}</p>
+                <div className={`text-4xl font-bold ${toneText[v.tone]}`}>{v.stat}</div>
+                <p className="mt-2 text-sm text-muted-foreground">{v.label}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
-      <section className="mx-auto max-w-[1400px] px-6 py-20 text-center">
-        <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight">Walk into the room.</h2>
-        <p className="mt-3 text-muted-foreground max-w-xl mx-auto">
-          Watch a cash crunch get detected, debated, and de-risked in real time. Click any number to see the Python
-          that produced it stream in token by token.
-        </p>
-        <Link to="/app" className="mt-6 inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 transition">
-          Open the Boardroom →
-        </Link>
-      </section>
-    </div>
-  );
-}
 
-function Stat({ label, value, sub, tone }: { label: string; value: string; sub: string; tone?: "alert" }) {
-  return (
-    <div className={`rounded-xl border ${tone === "alert" ? "border-rose-400/40" : "border-border"} bg-surface/60 p-5 backdrop-blur`}>
-      <div className="text-[11px] uppercase tracking-wider text-muted-foreground mono">{label}</div>
-      <div className={`mt-1 text-2xl font-semibold ${tone === "alert" ? "text-rose-300" : ""}`}>{value}</div>
-      <div className="mt-1 text-xs text-muted-foreground">{sub}</div>
+      {/* How it works */}
+      <section className="mx-auto max-w-[1100px] px-6 pb-16">
+        <div className="text-center mb-6">
+          <span className="text-[11px] mono uppercase tracking-[0.2em] text-muted-foreground">
+            How it works
+          </span>
+          <h2 className="mt-2 text-2xl font-semibold">Connect once. It runs the rest.</h2>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {STEPS.map((s, i) => (
+            <motion.div
+              key={s.title}
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.05 }}
+              className="relative rounded-xl border border-border bg-surface/60 p-5"
+            >
+              <div className="flex items-center gap-2">
+                <span className="grid h-8 w-8 place-items-center rounded-lg border border-primary/30 bg-primary/10">
+                  <s.Icon className="h-4 w-4 accent-text" />
+                </span>
+                <span className="text-[10px] mono text-muted-foreground">STEP {i + 1}</span>
+              </div>
+              <h3 className="mt-3 font-semibold">{s.title}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{s.body}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* Agent grid */}
+      <section className="mx-auto max-w-[1100px] px-6 pb-24">
+        <div className="text-center mb-6">
+          <span className="text-[11px] mono uppercase tracking-[0.2em] text-muted-foreground">
+            The team
+          </span>
+          <h2 className="mt-2 text-2xl font-semibold">Six specialists. One shared brain.</h2>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {AGENTS.map((a, i) => (
+            <motion.div
+              key={a.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: i * 0.05 }}
+              className="group rounded-xl border border-border bg-surface/60 p-5 hover:border-primary/40 transition"
+            >
+              <span className="grid h-11 w-11 place-items-center rounded-lg border border-border bg-background/60 group-hover:border-primary/40 transition">
+                <a.Icon className="h-5 w-5 accent-text" />
+              </span>
+              <h3 className="mt-3 font-semibold text-lg">{a.name}</h3>
+              <p className="mt-1 text-sm text-muted-foreground">{a.tone}</p>
+            </motion.div>
+          ))}
+        </div>
+
+        <div className="mt-10 text-center">
+          <Link
+            to="/app"
+            className="inline-flex items-center justify-center gap-1.5 rounded-md bg-primary px-6 py-3 text-sm font-semibold text-primary-foreground hover:opacity-90 transition"
+          >
+            See it run live <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </section>
     </div>
   );
 }

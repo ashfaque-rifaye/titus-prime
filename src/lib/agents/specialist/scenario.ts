@@ -62,8 +62,9 @@ export async function runScenario(args: {
     collectIds: sortedInvoices.slice(0, 4).map((i) => i.id),
     pauseIds: pausable.slice(0, 2).map((s) => s.id),
     delayIds: [],
-    bufferGain: sortedInvoices.slice(0, 4).reduce((s, i) => s + i.amount * 0.85, 0)
-      + pausable.slice(0, 2).reduce((s, x) => s + x.monthlyCost, 0),
+    bufferGain:
+      sortedInvoices.slice(0, 4).reduce((s, i) => s + i.amount * 0.85, 0) +
+      pausable.slice(0, 2).reduce((s, x) => s + x.monthlyCost, 0),
     rationale: "Maximizes recoverable cash under high success probability.",
   };
   const planB: ScenarioPlan = {
@@ -72,8 +73,9 @@ export async function runScenario(args: {
     collectIds: sortedInvoices.slice(0, 2).map((i) => i.id),
     pauseIds: [],
     delayIds: cheapestVendor ? [cheapestVendor.id] : [],
-    bufferGain: sortedInvoices.slice(0, 2).reduce((s, i) => s + i.amount * 0.85, 0)
-      + (cheapestVendor?.amount ?? 0),
+    bufferGain:
+      sortedInvoices.slice(0, 2).reduce((s, i) => s + i.amount * 0.85, 0) +
+      (cheapestVendor?.amount ?? 0),
     rationale: "Buys time without irritating customers.",
   };
   const planC: ScenarioPlan = {
@@ -98,7 +100,9 @@ export async function runScenario(args: {
     agent: "scenario",
     severity: "info",
     title: `${plans.length} survival plans ranked`,
-    detail: plans.map((p) => `${p.name} (${p.successPct}% · +$${p.bufferGain.toLocaleString()})`).join(" · "),
+    detail: plans
+      .map((p) => `${p.name} (${p.successPct}% · +$${p.bufferGain.toLocaleString()})`)
+      .join(" · "),
     data: { plans },
   });
 

@@ -9,16 +9,8 @@
  */
 import { getSnapshot, ensureSnapshot } from "./connectors/registry";
 import type { CanonicalSnapshot } from "./connectors/types";
-import type {
-  Invoice,
-  Subscription,
-  Vendor,
-  StateRevenue,
-} from "./mock-data";
-import {
-  STATE_REVENUE as STATIC_STATE_REVENUE,
-  PAYROLL,
-} from "./mock-data";
+import type { Invoice, Subscription, Vendor, StateRevenue } from "./mock-data";
+import { STATE_REVENUE as STATIC_STATE_REVENUE, PAYROLL } from "./mock-data";
 
 /** Headline summary used by Treasury Sentinel and the Boardroom hero. */
 export type ProjectionPoint = { day: number; balance: number; event?: string };
@@ -81,10 +73,7 @@ function shape(snap: CanonicalSnapshot): DerivedView {
       name: o.vendor,
       amount: Math.round(o.amountUsd),
       netDays: 30,
-      daysLeft: Math.max(
-        0,
-        Math.round((new Date(o.dueAt).getTime() - Date.now()) / 86400_000),
-      ),
+      daysLeft: Math.max(0, Math.round((new Date(o.dueAt).getTime() - Date.now()) / 86400_000)),
       discountPct: idx === 0 ? 2 : 0,
     }));
 
@@ -117,10 +106,7 @@ function projectCash(snap: CanonicalSnapshot): ProjectionPoint[] {
   const points: ProjectionPoint[] = [];
   const outflowsByDay = new Map<number, { amount: number; vendor: string }>();
   for (const o of snap.outflows) {
-    const day = Math.max(
-      0,
-      Math.round((new Date(o.dueAt).getTime() - Date.now()) / 86400_000),
-    );
+    const day = Math.max(0, Math.round((new Date(o.dueAt).getTime() - Date.now()) / 86400_000));
     const existing = outflowsByDay.get(day);
     outflowsByDay.set(day, {
       amount: (existing?.amount ?? 0) + o.amountUsd,

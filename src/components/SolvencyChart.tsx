@@ -58,16 +58,25 @@ export function SolvencyChart({
   const y = (v: number) => PAD_TOP + INNER_H - ((v - yMin) / (yMax - yMin)) * INNER_H;
 
   const buildPath = (pts: ProjectionPoint[]) =>
-    pts.map((p, i) => `${i === 0 ? "M" : "L"}${x(p.day).toFixed(1)},${y(p.balance).toFixed(1)}`).join(" ");
+    pts
+      .map((p, i) => `${i === 0 ? "M" : "L"}${x(p.day).toFixed(1)},${y(p.balance).toFixed(1)}`)
+      .join(" ");
 
   const buildArea = (pts: ProjectionPoint[]) => {
-    const top = pts.map((p, i) => `${i === 0 ? "M" : "L"}${x(p.day).toFixed(1)},${y(p.balance).toFixed(1)}`).join(" ");
+    const top = pts
+      .map((p, i) => `${i === 0 ? "M" : "L"}${x(p.day).toFixed(1)},${y(p.balance).toFixed(1)}`)
+      .join(" ");
     return `${top} L${x(pts[pts.length - 1].day).toFixed(1)},${y(yMin).toFixed(1)} L${x(pts[0].day).toFixed(1)},${y(yMin).toFixed(1)} Z`;
   };
 
   const buildBetween = () => {
-    const top = autopilot.map((p, i) => `${i === 0 ? "M" : "L"}${x(p.day).toFixed(1)},${y(p.balance).toFixed(1)}`).join(" ");
-    const bot = [...standby].reverse().map((p) => `L${x(p.day).toFixed(1)},${y(p.balance).toFixed(1)}`).join(" ");
+    const top = autopilot
+      .map((p, i) => `${i === 0 ? "M" : "L"}${x(p.day).toFixed(1)},${y(p.balance).toFixed(1)}`)
+      .join(" ");
+    const bot = [...standby]
+      .reverse()
+      .map((p) => `L${x(p.day).toFixed(1)},${y(p.balance).toFixed(1)}`)
+      .join(" ");
     return `${top} ${bot} Z`;
   };
 
@@ -75,7 +84,10 @@ export function SolvencyChart({
   const autopilotEnd = autopilot[autopilot.length - 1]?.balance ?? 0;
   const agentValue = autopilotEnd - standbyEnd;
 
-  const lowest = useMemo(() => series.reduce((m, p) => (p.balance < m.balance ? p : m), series[0]), [series]);
+  const lowest = useMemo(
+    () => series.reduce((m, p) => (p.balance < m.balance ? p : m), series[0]),
+    [series],
+  );
   const lowestStandby = useMemo(
     () => standby.reduce((m, p) => (p.balance < m.balance ? p : m), standby[0]),
     [standby],
@@ -94,9 +106,14 @@ export function SolvencyChart({
   const hoveredStandby = hoverDay !== null ? standby[hoverDay] : null;
   const hoveredAuto = hoverDay !== null ? autopilot[hoverDay] : null;
 
-  const trend = mode === "autopilot"
-    ? autopilotEnd >= safetyFloor ? `Surplus +$${autopilotEnd.toLocaleString()}` : `Tight: $${autopilotEnd.toLocaleString()}`
-    : standbyEnd < safetyFloor ? `Deficit projected ($${standbyEnd.toLocaleString()})` : `Stable $${standbyEnd.toLocaleString()}`;
+  const trend =
+    mode === "autopilot"
+      ? autopilotEnd >= safetyFloor
+        ? `Surplus +$${autopilotEnd.toLocaleString()}`
+        : `Tight: $${autopilotEnd.toLocaleString()}`
+      : standbyEnd < safetyFloor
+        ? `Deficit projected ($${standbyEnd.toLocaleString()})`
+        : `Stable $${standbyEnd.toLocaleString()}`;
 
   const trendTone = mode === "autopilot" ? "emerald" : standbyEnd < safetyFloor ? "rose" : "indigo";
 
@@ -111,10 +128,13 @@ export function SolvencyChart({
               <span className="absolute inset-0 rounded-full bg-primary opacity-60 animate-ping" />
               <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
             </span>
-            <h3 className="text-sm font-semibold tracking-wide uppercase">30-Day Solvency Forecast & Net Runway</h3>
+            <h3 className="text-sm font-semibold tracking-wide uppercase">
+              30-Day Solvency Forecast & Net Runway
+            </h3>
           </div>
           <p className="mt-1 text-xs text-muted-foreground max-w-md">
-            Compare what happens when you let it ride versus when Titus-Prime acts on the recommended scenario.
+            Compare what happens when you let it ride versus when Titus-Prime acts on the
+            recommended scenario.
           </p>
         </div>
 
@@ -172,8 +192,23 @@ export function SolvencyChart({
             const yy = PAD_TOP + INNER_H * f;
             return (
               <g key={f}>
-                <line x1={PAD_LEFT} x2={W - PAD_RIGHT} y1={yy} y2={yy} stroke="hsl(var(--border))" strokeOpacity="0.5" strokeDasharray="2 4" />
-                <text x={PAD_LEFT - 8} y={yy + 3} textAnchor="end" fontSize="9" fill="hsl(var(--muted-foreground))" className="mono">
+                <line
+                  x1={PAD_LEFT}
+                  x2={W - PAD_RIGHT}
+                  y1={yy}
+                  y2={yy}
+                  stroke="hsl(var(--border))"
+                  strokeOpacity="0.5"
+                  strokeDasharray="2 4"
+                />
+                <text
+                  x={PAD_LEFT - 8}
+                  y={yy + 3}
+                  textAnchor="end"
+                  fontSize="9"
+                  fill="hsl(var(--muted-foreground))"
+                  className="mono"
+                >
                   ${Math.round(v / 1000)}k
                 </text>
               </g>
@@ -190,7 +225,13 @@ export function SolvencyChart({
             strokeOpacity="0.5"
             strokeDasharray="3 3"
           />
-          <text x={PAD_LEFT + 4} y={y(safetyFloor) - 4} fontSize="9" fill="#f43f5e" className="mono">
+          <text
+            x={PAD_LEFT + 4}
+            y={y(safetyFloor) - 4}
+            fontSize="9"
+            fill="#f43f5e"
+            className="mono"
+          >
             Safety floor ${safetyFloor.toLocaleString()}
           </text>
 
@@ -227,7 +268,10 @@ export function SolvencyChart({
           )}
 
           {/* Active line filled */}
-          <path d={buildArea(series)} fill={`url(#${mode === "autopilot" ? "autopilotArea" : "standbyArea"})`} />
+          <path
+            d={buildArea(series)}
+            fill={`url(#${mode === "autopilot" ? "autopilotArea" : "standbyArea"})`}
+          />
           <motion.path
             key={`${mode}-active`}
             initial={{ pathLength: 0 }}
@@ -310,32 +354,68 @@ export function SolvencyChart({
           {/* Hover guide */}
           {hoverDay !== null && (
             <g>
-              <line x1={x(hoverDay)} x2={x(hoverDay)} y1={PAD_TOP} y2={PAD_TOP + INNER_H} stroke="hsl(var(--primary))" strokeOpacity="0.6" strokeDasharray="2 2" />
+              <line
+                x1={x(hoverDay)}
+                x2={x(hoverDay)}
+                y1={PAD_TOP}
+                y2={PAD_TOP + INNER_H}
+                stroke="hsl(var(--primary))"
+                strokeOpacity="0.6"
+                strokeDasharray="2 2"
+              />
               {hoveredStandby && (
-                <circle cx={x(hoverDay)} cy={y(hoveredStandby.balance)} r="4" fill="#f87171" stroke="#0b0b0d" strokeWidth="2" />
+                <circle
+                  cx={x(hoverDay)}
+                  cy={y(hoveredStandby.balance)}
+                  r="4"
+                  fill="#f87171"
+                  stroke="#0b0b0d"
+                  strokeWidth="2"
+                />
               )}
               {hoveredAuto && (
-                <circle cx={x(hoverDay)} cy={y(hoveredAuto.balance)} r="4" fill="#34d399" stroke="#0b0b0d" strokeWidth="2" />
+                <circle
+                  cx={x(hoverDay)}
+                  cy={y(hoveredAuto.balance)}
+                  r="4"
+                  fill="#34d399"
+                  stroke="#0b0b0d"
+                  strokeWidth="2"
+                />
               )}
             </g>
           )}
 
           {/* X axis labels */}
-          {[0, 6, 12, 18, 24, 30].filter((d) => d < days).map((d) => (
-            <text key={d} x={x(d)} y={H - 14} textAnchor="middle" fontSize="9" fill="hsl(var(--muted-foreground))" className="mono">
-              Day {d}
-            </text>
-          ))}
+          {[0, 6, 12, 18, 24, 30]
+            .filter((d) => d < days)
+            .map((d) => (
+              <text
+                key={d}
+                x={x(d)}
+                y={H - 14}
+                textAnchor="middle"
+                fontSize="9"
+                fill="hsl(var(--muted-foreground))"
+                className="mono"
+              >
+                Day {d}
+              </text>
+            ))}
         </svg>
 
         {/* Trend chip */}
         <div className="absolute top-2 right-2 flex items-center gap-2">
           <span className="text-[10px] mono text-muted-foreground">Post-solver trend</span>
-          <span className={`text-[10px] mono px-2 py-0.5 rounded border ${
-            trendTone === "emerald" ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30" :
-            trendTone === "rose" ? "bg-rose-500/10 text-rose-300 border-rose-500/30" :
-            "bg-indigo-500/10 text-indigo-300 border-indigo-500/30"
-          }`}>
+          <span
+            className={`text-[10px] mono px-2 py-0.5 rounded border ${
+              trendTone === "emerald"
+                ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
+                : trendTone === "rose"
+                  ? "bg-rose-500/10 text-rose-300 border-rose-500/30"
+                  : "bg-indigo-500/10 text-indigo-300 border-indigo-500/30"
+            }`}
+          >
             {trend}
           </span>
         </div>
@@ -350,7 +430,9 @@ export function SolvencyChart({
               {hovered ? `Day ${hovered.day}` : "Glide cursor over the chart for microanalysis"}
             </div>
             <div className="text-xs text-foreground truncate">
-              {hovered ? (hovered.event ?? "Idle day · no scheduled events") : "Hover any point to inspect inflows / outflows."}
+              {hovered
+                ? (hovered.event ?? "Idle day · no scheduled events")
+                : "Hover any point to inspect inflows / outflows."}
             </div>
           </div>
         </div>
@@ -395,12 +477,22 @@ export function SolvencyChart({
   );
 }
 
-function Reading({ label, value, tone }: { label: string; value: number; tone: "rose" | "emerald" }) {
+function Reading({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: number;
+  tone: "rose" | "emerald";
+}) {
   const color = tone === "rose" ? "text-rose-300" : "text-emerald-300";
   return (
     <div className="text-right">
       <div className="text-[9px] mono uppercase tracking-wider text-muted-foreground">{label}</div>
-      <div className={`text-sm mono font-semibold ${color}`}>${Math.round(value).toLocaleString()}</div>
+      <div className={`text-sm mono font-semibold ${color}`}>
+        ${Math.round(value).toLocaleString()}
+      </div>
     </div>
   );
 }
@@ -417,7 +509,11 @@ function Kpi({
   tone: "rose" | "emerald" | "primary";
 }) {
   const border =
-    tone === "emerald" ? "border-emerald-500/30" : tone === "rose" ? "border-rose-500/30" : "border-primary/30";
+    tone === "emerald"
+      ? "border-emerald-500/30"
+      : tone === "rose"
+        ? "border-rose-500/30"
+        : "border-primary/30";
   const valueColor =
     tone === "emerald" ? "text-emerald-300" : tone === "rose" ? "text-rose-300" : "text-foreground";
   return (

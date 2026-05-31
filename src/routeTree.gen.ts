@@ -10,18 +10,29 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SkillsRouteImport } from './routes/skills'
+import { Route as ReviewRouteImport } from './routes/review'
 import { Route as PolicyRouteImport } from './routes/policy'
-import { Route as ArchitectureRouteImport } from './routes/architecture'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiSnapshotRouteImport } from './routes/api/snapshot'
 import { Route as ApiAskRouteImport } from './routes/api/ask'
+import { Route as ApiVoiceTtsRouteImport } from './routes/api/voice.tts'
+import { Route as ApiVoiceSttRouteImport } from './routes/api/voice.stt'
+import { Route as ApiVoiceChatRouteImport } from './routes/api/voice.chat'
+import { Route as ApiValueWhatifRouteImport } from './routes/api/value.whatif'
+import { Route as ApiValueScoreboardRouteImport } from './routes/api/value.scoreboard'
+import { Route as ApiValueRealizeRouteImport } from './routes/api/value.realize'
+import { Route as ApiValueOutcomesRouteImport } from './routes/api/value.outcomes'
+import { Route as ApiValueAnomaliesRouteImport } from './routes/api/value.anomalies'
 import { Route as ApiTreasuryProjectionRouteImport } from './routes/api/treasury.projection'
 import { Route as ApiLlmHealthRouteImport } from './routes/api/llm.health'
+import { Route as ApiEmailComposeRouteImport } from './routes/api/email.compose'
 import { Route as ApiCsvIngestRouteImport } from './routes/api/csv.ingest'
 import { Route as ApiConnectorsSyncRouteImport } from './routes/api/connectors.sync'
 import { Route as ApiConnectorsListRouteImport } from './routes/api/connectors.list'
 import { Route as ApiCodexStreamRouteImport } from './routes/api/codex.stream'
+import { Route as ApiCloudGcpRouteImport } from './routes/api/cloud.gcp'
+import { Route as ApiCloudAwsRouteImport } from './routes/api/cloud.aws'
 import { Route as ApiAgentsRunRouteImport } from './routes/api/agents.run'
 import { Route as ApiAgentsCustomizeRouteImport } from './routes/api/agents.customize'
 
@@ -30,14 +41,14 @@ const SkillsRoute = SkillsRouteImport.update({
   path: '/skills',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReviewRoute = ReviewRouteImport.update({
+  id: '/review',
+  path: '/review',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PolicyRoute = PolicyRouteImport.update({
   id: '/policy',
   path: '/policy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ArchitectureRoute = ArchitectureRouteImport.update({
-  id: '/architecture',
-  path: '/architecture',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -60,6 +71,46 @@ const ApiAskRoute = ApiAskRouteImport.update({
   path: '/api/ask',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiVoiceTtsRoute = ApiVoiceTtsRouteImport.update({
+  id: '/api/voice/tts',
+  path: '/api/voice/tts',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiVoiceSttRoute = ApiVoiceSttRouteImport.update({
+  id: '/api/voice/stt',
+  path: '/api/voice/stt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiVoiceChatRoute = ApiVoiceChatRouteImport.update({
+  id: '/api/voice/chat',
+  path: '/api/voice/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiValueWhatifRoute = ApiValueWhatifRouteImport.update({
+  id: '/api/value/whatif',
+  path: '/api/value/whatif',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiValueScoreboardRoute = ApiValueScoreboardRouteImport.update({
+  id: '/api/value/scoreboard',
+  path: '/api/value/scoreboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiValueRealizeRoute = ApiValueRealizeRouteImport.update({
+  id: '/api/value/realize',
+  path: '/api/value/realize',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiValueOutcomesRoute = ApiValueOutcomesRouteImport.update({
+  id: '/api/value/outcomes',
+  path: '/api/value/outcomes',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiValueAnomaliesRoute = ApiValueAnomaliesRouteImport.update({
+  id: '/api/value/anomalies',
+  path: '/api/value/anomalies',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTreasuryProjectionRoute = ApiTreasuryProjectionRouteImport.update({
   id: '/api/treasury/projection',
   path: '/api/treasury/projection',
@@ -68,6 +119,11 @@ const ApiTreasuryProjectionRoute = ApiTreasuryProjectionRouteImport.update({
 const ApiLlmHealthRoute = ApiLlmHealthRouteImport.update({
   id: '/api/llm/health',
   path: '/api/llm/health',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiEmailComposeRoute = ApiEmailComposeRouteImport.update({
+  id: '/api/email/compose',
+  path: '/api/email/compose',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiCsvIngestRoute = ApiCsvIngestRouteImport.update({
@@ -90,6 +146,16 @@ const ApiCodexStreamRoute = ApiCodexStreamRouteImport.update({
   path: '/api/codex/stream',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCloudGcpRoute = ApiCloudGcpRouteImport.update({
+  id: '/api/cloud/gcp',
+  path: '/api/cloud/gcp',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCloudAwsRoute = ApiCloudAwsRouteImport.update({
+  id: '/api/cloud/aws',
+  path: '/api/cloud/aws',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAgentsRunRoute = ApiAgentsRunRouteImport.update({
   id: '/api/agents/run',
   path: '/api/agents/run',
@@ -104,125 +170,202 @@ const ApiAgentsCustomizeRoute = ApiAgentsCustomizeRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
-  '/architecture': typeof ArchitectureRoute
   '/policy': typeof PolicyRoute
+  '/review': typeof ReviewRoute
   '/skills': typeof SkillsRoute
   '/api/ask': typeof ApiAskRoute
   '/api/snapshot': typeof ApiSnapshotRoute
   '/api/agents/customize': typeof ApiAgentsCustomizeRoute
   '/api/agents/run': typeof ApiAgentsRunRoute
+  '/api/cloud/aws': typeof ApiCloudAwsRoute
+  '/api/cloud/gcp': typeof ApiCloudGcpRoute
   '/api/codex/stream': typeof ApiCodexStreamRoute
   '/api/connectors/list': typeof ApiConnectorsListRoute
   '/api/connectors/sync': typeof ApiConnectorsSyncRoute
   '/api/csv/ingest': typeof ApiCsvIngestRoute
+  '/api/email/compose': typeof ApiEmailComposeRoute
   '/api/llm/health': typeof ApiLlmHealthRoute
   '/api/treasury/projection': typeof ApiTreasuryProjectionRoute
+  '/api/value/anomalies': typeof ApiValueAnomaliesRoute
+  '/api/value/outcomes': typeof ApiValueOutcomesRoute
+  '/api/value/realize': typeof ApiValueRealizeRoute
+  '/api/value/scoreboard': typeof ApiValueScoreboardRoute
+  '/api/value/whatif': typeof ApiValueWhatifRoute
+  '/api/voice/chat': typeof ApiVoiceChatRoute
+  '/api/voice/stt': typeof ApiVoiceSttRoute
+  '/api/voice/tts': typeof ApiVoiceTtsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/app': typeof AppRoute
-  '/architecture': typeof ArchitectureRoute
   '/policy': typeof PolicyRoute
+  '/review': typeof ReviewRoute
   '/skills': typeof SkillsRoute
   '/api/ask': typeof ApiAskRoute
   '/api/snapshot': typeof ApiSnapshotRoute
   '/api/agents/customize': typeof ApiAgentsCustomizeRoute
   '/api/agents/run': typeof ApiAgentsRunRoute
+  '/api/cloud/aws': typeof ApiCloudAwsRoute
+  '/api/cloud/gcp': typeof ApiCloudGcpRoute
   '/api/codex/stream': typeof ApiCodexStreamRoute
   '/api/connectors/list': typeof ApiConnectorsListRoute
   '/api/connectors/sync': typeof ApiConnectorsSyncRoute
   '/api/csv/ingest': typeof ApiCsvIngestRoute
+  '/api/email/compose': typeof ApiEmailComposeRoute
   '/api/llm/health': typeof ApiLlmHealthRoute
   '/api/treasury/projection': typeof ApiTreasuryProjectionRoute
+  '/api/value/anomalies': typeof ApiValueAnomaliesRoute
+  '/api/value/outcomes': typeof ApiValueOutcomesRoute
+  '/api/value/realize': typeof ApiValueRealizeRoute
+  '/api/value/scoreboard': typeof ApiValueScoreboardRoute
+  '/api/value/whatif': typeof ApiValueWhatifRoute
+  '/api/voice/chat': typeof ApiVoiceChatRoute
+  '/api/voice/stt': typeof ApiVoiceSttRoute
+  '/api/voice/tts': typeof ApiVoiceTtsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/app': typeof AppRoute
-  '/architecture': typeof ArchitectureRoute
   '/policy': typeof PolicyRoute
+  '/review': typeof ReviewRoute
   '/skills': typeof SkillsRoute
   '/api/ask': typeof ApiAskRoute
   '/api/snapshot': typeof ApiSnapshotRoute
   '/api/agents/customize': typeof ApiAgentsCustomizeRoute
   '/api/agents/run': typeof ApiAgentsRunRoute
+  '/api/cloud/aws': typeof ApiCloudAwsRoute
+  '/api/cloud/gcp': typeof ApiCloudGcpRoute
   '/api/codex/stream': typeof ApiCodexStreamRoute
   '/api/connectors/list': typeof ApiConnectorsListRoute
   '/api/connectors/sync': typeof ApiConnectorsSyncRoute
   '/api/csv/ingest': typeof ApiCsvIngestRoute
+  '/api/email/compose': typeof ApiEmailComposeRoute
   '/api/llm/health': typeof ApiLlmHealthRoute
   '/api/treasury/projection': typeof ApiTreasuryProjectionRoute
+  '/api/value/anomalies': typeof ApiValueAnomaliesRoute
+  '/api/value/outcomes': typeof ApiValueOutcomesRoute
+  '/api/value/realize': typeof ApiValueRealizeRoute
+  '/api/value/scoreboard': typeof ApiValueScoreboardRoute
+  '/api/value/whatif': typeof ApiValueWhatifRoute
+  '/api/voice/chat': typeof ApiVoiceChatRoute
+  '/api/voice/stt': typeof ApiVoiceSttRoute
+  '/api/voice/tts': typeof ApiVoiceTtsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/app'
-    | '/architecture'
     | '/policy'
+    | '/review'
     | '/skills'
     | '/api/ask'
     | '/api/snapshot'
     | '/api/agents/customize'
     | '/api/agents/run'
+    | '/api/cloud/aws'
+    | '/api/cloud/gcp'
     | '/api/codex/stream'
     | '/api/connectors/list'
     | '/api/connectors/sync'
     | '/api/csv/ingest'
+    | '/api/email/compose'
     | '/api/llm/health'
     | '/api/treasury/projection'
+    | '/api/value/anomalies'
+    | '/api/value/outcomes'
+    | '/api/value/realize'
+    | '/api/value/scoreboard'
+    | '/api/value/whatif'
+    | '/api/voice/chat'
+    | '/api/voice/stt'
+    | '/api/voice/tts'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/app'
-    | '/architecture'
     | '/policy'
+    | '/review'
     | '/skills'
     | '/api/ask'
     | '/api/snapshot'
     | '/api/agents/customize'
     | '/api/agents/run'
+    | '/api/cloud/aws'
+    | '/api/cloud/gcp'
     | '/api/codex/stream'
     | '/api/connectors/list'
     | '/api/connectors/sync'
     | '/api/csv/ingest'
+    | '/api/email/compose'
     | '/api/llm/health'
     | '/api/treasury/projection'
+    | '/api/value/anomalies'
+    | '/api/value/outcomes'
+    | '/api/value/realize'
+    | '/api/value/scoreboard'
+    | '/api/value/whatif'
+    | '/api/voice/chat'
+    | '/api/voice/stt'
+    | '/api/voice/tts'
   id:
     | '__root__'
     | '/'
     | '/app'
-    | '/architecture'
     | '/policy'
+    | '/review'
     | '/skills'
     | '/api/ask'
     | '/api/snapshot'
     | '/api/agents/customize'
     | '/api/agents/run'
+    | '/api/cloud/aws'
+    | '/api/cloud/gcp'
     | '/api/codex/stream'
     | '/api/connectors/list'
     | '/api/connectors/sync'
     | '/api/csv/ingest'
+    | '/api/email/compose'
     | '/api/llm/health'
     | '/api/treasury/projection'
+    | '/api/value/anomalies'
+    | '/api/value/outcomes'
+    | '/api/value/realize'
+    | '/api/value/scoreboard'
+    | '/api/value/whatif'
+    | '/api/voice/chat'
+    | '/api/voice/stt'
+    | '/api/voice/tts'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRoute
-  ArchitectureRoute: typeof ArchitectureRoute
   PolicyRoute: typeof PolicyRoute
+  ReviewRoute: typeof ReviewRoute
   SkillsRoute: typeof SkillsRoute
   ApiAskRoute: typeof ApiAskRoute
   ApiSnapshotRoute: typeof ApiSnapshotRoute
   ApiAgentsCustomizeRoute: typeof ApiAgentsCustomizeRoute
   ApiAgentsRunRoute: typeof ApiAgentsRunRoute
+  ApiCloudAwsRoute: typeof ApiCloudAwsRoute
+  ApiCloudGcpRoute: typeof ApiCloudGcpRoute
   ApiCodexStreamRoute: typeof ApiCodexStreamRoute
   ApiConnectorsListRoute: typeof ApiConnectorsListRoute
   ApiConnectorsSyncRoute: typeof ApiConnectorsSyncRoute
   ApiCsvIngestRoute: typeof ApiCsvIngestRoute
+  ApiEmailComposeRoute: typeof ApiEmailComposeRoute
   ApiLlmHealthRoute: typeof ApiLlmHealthRoute
   ApiTreasuryProjectionRoute: typeof ApiTreasuryProjectionRoute
+  ApiValueAnomaliesRoute: typeof ApiValueAnomaliesRoute
+  ApiValueOutcomesRoute: typeof ApiValueOutcomesRoute
+  ApiValueRealizeRoute: typeof ApiValueRealizeRoute
+  ApiValueScoreboardRoute: typeof ApiValueScoreboardRoute
+  ApiValueWhatifRoute: typeof ApiValueWhatifRoute
+  ApiVoiceChatRoute: typeof ApiVoiceChatRoute
+  ApiVoiceSttRoute: typeof ApiVoiceSttRoute
+  ApiVoiceTtsRoute: typeof ApiVoiceTtsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -234,18 +377,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SkillsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/review': {
+      id: '/review'
+      path: '/review'
+      fullPath: '/review'
+      preLoaderRoute: typeof ReviewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/policy': {
       id: '/policy'
       path: '/policy'
       fullPath: '/policy'
       preLoaderRoute: typeof PolicyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/architecture': {
-      id: '/architecture'
-      path: '/architecture'
-      fullPath: '/architecture'
-      preLoaderRoute: typeof ArchitectureRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app': {
@@ -276,6 +419,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAskRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/voice/tts': {
+      id: '/api/voice/tts'
+      path: '/api/voice/tts'
+      fullPath: '/api/voice/tts'
+      preLoaderRoute: typeof ApiVoiceTtsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/voice/stt': {
+      id: '/api/voice/stt'
+      path: '/api/voice/stt'
+      fullPath: '/api/voice/stt'
+      preLoaderRoute: typeof ApiVoiceSttRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/voice/chat': {
+      id: '/api/voice/chat'
+      path: '/api/voice/chat'
+      fullPath: '/api/voice/chat'
+      preLoaderRoute: typeof ApiVoiceChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/value/whatif': {
+      id: '/api/value/whatif'
+      path: '/api/value/whatif'
+      fullPath: '/api/value/whatif'
+      preLoaderRoute: typeof ApiValueWhatifRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/value/scoreboard': {
+      id: '/api/value/scoreboard'
+      path: '/api/value/scoreboard'
+      fullPath: '/api/value/scoreboard'
+      preLoaderRoute: typeof ApiValueScoreboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/value/realize': {
+      id: '/api/value/realize'
+      path: '/api/value/realize'
+      fullPath: '/api/value/realize'
+      preLoaderRoute: typeof ApiValueRealizeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/value/outcomes': {
+      id: '/api/value/outcomes'
+      path: '/api/value/outcomes'
+      fullPath: '/api/value/outcomes'
+      preLoaderRoute: typeof ApiValueOutcomesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/value/anomalies': {
+      id: '/api/value/anomalies'
+      path: '/api/value/anomalies'
+      fullPath: '/api/value/anomalies'
+      preLoaderRoute: typeof ApiValueAnomaliesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/treasury/projection': {
       id: '/api/treasury/projection'
       path: '/api/treasury/projection'
@@ -288,6 +487,13 @@ declare module '@tanstack/react-router' {
       path: '/api/llm/health'
       fullPath: '/api/llm/health'
       preLoaderRoute: typeof ApiLlmHealthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/email/compose': {
+      id: '/api/email/compose'
+      path: '/api/email/compose'
+      fullPath: '/api/email/compose'
+      preLoaderRoute: typeof ApiEmailComposeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/csv/ingest': {
@@ -318,6 +524,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCodexStreamRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cloud/gcp': {
+      id: '/api/cloud/gcp'
+      path: '/api/cloud/gcp'
+      fullPath: '/api/cloud/gcp'
+      preLoaderRoute: typeof ApiCloudGcpRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cloud/aws': {
+      id: '/api/cloud/aws'
+      path: '/api/cloud/aws'
+      fullPath: '/api/cloud/aws'
+      preLoaderRoute: typeof ApiCloudAwsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/agents/run': {
       id: '/api/agents/run'
       path: '/api/agents/run'
@@ -338,19 +558,30 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRoute,
-  ArchitectureRoute: ArchitectureRoute,
   PolicyRoute: PolicyRoute,
+  ReviewRoute: ReviewRoute,
   SkillsRoute: SkillsRoute,
   ApiAskRoute: ApiAskRoute,
   ApiSnapshotRoute: ApiSnapshotRoute,
   ApiAgentsCustomizeRoute: ApiAgentsCustomizeRoute,
   ApiAgentsRunRoute: ApiAgentsRunRoute,
+  ApiCloudAwsRoute: ApiCloudAwsRoute,
+  ApiCloudGcpRoute: ApiCloudGcpRoute,
   ApiCodexStreamRoute: ApiCodexStreamRoute,
   ApiConnectorsListRoute: ApiConnectorsListRoute,
   ApiConnectorsSyncRoute: ApiConnectorsSyncRoute,
   ApiCsvIngestRoute: ApiCsvIngestRoute,
+  ApiEmailComposeRoute: ApiEmailComposeRoute,
   ApiLlmHealthRoute: ApiLlmHealthRoute,
   ApiTreasuryProjectionRoute: ApiTreasuryProjectionRoute,
+  ApiValueAnomaliesRoute: ApiValueAnomaliesRoute,
+  ApiValueOutcomesRoute: ApiValueOutcomesRoute,
+  ApiValueRealizeRoute: ApiValueRealizeRoute,
+  ApiValueScoreboardRoute: ApiValueScoreboardRoute,
+  ApiValueWhatifRoute: ApiValueWhatifRoute,
+  ApiVoiceChatRoute: ApiVoiceChatRoute,
+  ApiVoiceSttRoute: ApiVoiceSttRoute,
+  ApiVoiceTtsRoute: ApiVoiceTtsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

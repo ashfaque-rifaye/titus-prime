@@ -40,7 +40,11 @@ export function AskMode() {
         body: JSON.stringify({ question }),
       });
       if (!r.ok) {
-        setAns({ answer: `(${r.status}) Couldn't reach Ask Mode.`, highlights: [], citedFigures: [] });
+        setAns({
+          answer: `(${r.status}) Couldn't reach Ask Mode.`,
+          highlights: [],
+          citedFigures: [],
+        });
       } else {
         const j = (await r.json()) as Answer;
         setAns(j);
@@ -59,7 +63,9 @@ export function AskMode() {
       <div className="flex items-center gap-2 mb-3">
         <Sparkles className="h-4 w-4 accent-text" />
         <h3 className="text-sm font-semibold uppercase tracking-wide">Ask the CFO</h3>
-        <span className="text-[10px] mono text-muted-foreground">grounded in your live snapshot</span>
+        <span className="text-[10px] mono text-muted-foreground">
+          grounded in your live snapshot
+        </span>
       </div>
 
       <form
@@ -80,7 +86,11 @@ export function AskMode() {
           disabled={busy || !q.trim()}
           className="rounded-lg bg-primary text-primary-foreground px-4 py-2 text-xs font-semibold hover:opacity-90 transition disabled:opacity-50 inline-flex items-center gap-1.5"
         >
-          {busy ? <Loader2 className="h-3 w-3 animate-spin" /> : <ChevronRight className="h-3 w-3" />}
+          {busy ? (
+            <Loader2 className="h-3 w-3 animate-spin" />
+          ) : (
+            <ChevronRight className="h-3 w-3" />
+          )}
           {busy ? "Thinking…" : "Ask"}
         </button>
       </form>

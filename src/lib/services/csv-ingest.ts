@@ -72,7 +72,8 @@ export function parseCsv(text: string): { headers: string[]; rows: string[][] } 
 }
 
 const NUMBER_RE = /^-?\d+(?:\.\d+)?$/;
-const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(?:[T\s]\d{2}:\d{2}(?::\d{2})?(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?)?$/;
+const ISO_DATE_RE =
+  /^\d{4}-\d{2}-\d{2}(?:[T\s]\d{2}:\d{2}(?::\d{2})?(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?)?$/;
 const SLASH_DATE_RE = /^\d{1,2}[/-]\d{1,2}[/-]\d{2,4}$/;
 const BOOL_RE = /^(true|false|yes|no)$/i;
 

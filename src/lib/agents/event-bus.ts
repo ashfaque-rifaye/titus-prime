@@ -35,12 +35,10 @@ export class EventBus {
         // Best-effort handling of async listener rejections.
         if (r && typeof (r as Promise<unknown>).catch === "function") {
           (r as Promise<unknown>).catch((e) => {
-            // eslint-disable-next-line no-console
             console.error("[bus] listener error", e);
           });
         }
       } catch (e) {
-        // eslint-disable-next-line no-console
         console.error("[bus] listener throw", e);
       }
     }
@@ -89,8 +87,8 @@ export class EventBus {
  * but for an in-process Nitro server it's sufficient and lets us avoid extra infra.
  */
 declare global {
-  // eslint-disable-next-line no-var
   var __TITUS_BUS__: EventBus | undefined;
 }
 
-export const bus: EventBus = globalThis.__TITUS_BUS__ ?? (globalThis.__TITUS_BUS__ = new EventBus());
+export const bus: EventBus =
+  globalThis.__TITUS_BUS__ ?? (globalThis.__TITUS_BUS__ = new EventBus());

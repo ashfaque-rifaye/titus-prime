@@ -1,9 +1,9 @@
 /**
- * Common types for the dual-engine LLM service.
- * The same `LlmProvider` interface is implemented by Gemini (primary) and Codex (fallback).
+ * Common types for the LLM service.
+ * The single engine, Codex, implements the `LlmProvider` interface.
  */
 
-export type LlmEngine = "gemini" | "codex" | "groq";
+export type LlmEngine = "codex";
 
 export type LlmRole = "system" | "user" | "assistant";
 

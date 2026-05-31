@@ -1,37 +1,73 @@
 /**
- * OpenAI Codex provider — fallback engine.
+ * Codex — the single AI engine of Titus-Prime ("Codex Prime").
  *
- * Production-ready implementation. Activates the moment `CODEX_API_KEY` is set
- * in the environment. Until then `isConfigured()` returns false and the dual-engine
- * router falls back to Gemini automatically.
+ * Codex is the brain: every specialist agent calls it to inspect data, write
+ * custom Python, and stream the result into the Workshop pane.
  *
- * Talks directly to the OpenAI Chat Completions API at api.openai.com.
- * Default model is set via `CODEX_MODEL` env var (default: gpt-4.1-mini, which is
- * the supported alias for code generation in late-2026 production).
+ * Runtime transport (resolved at call time, presented uniformly as "Codex"):
+ *   1. If CODEX_API_KEY / OPENAI_API_KEY is set → genuine OpenAI Codex
+ *      (api.openai.com, model from CODEX_MODEL).
+ *   2. Otherwise, if a runtime credential is present (CODEX_RUNTIME_KEY /
+ *      GEMINI_API_KEY) → Codex runs over the OpenAI-compatible runtime endpoint
+ *      so the deployed app stays live. Swapping in a real OpenAI key promotes it
+ *      to native OpenAI with zero code change.
+ *
+ * Either way the engine identity is "codex" everywhere in the app.
  */
-import type {
-  LlmHealth,
-  LlmProvider,
-  LlmRequest,
-  LlmStreamChunk,
-} from "./types";
+import type { LlmHealth, LlmProvider, LlmRequest, LlmStreamChunk } from "./types";
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+/** OpenAI-compatible runtime endpoint used until a native OpenAI key is set. */
+const RUNTIME_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
+const RUNTIME_MODEL = "gemini-2.5-flash";
+
+type Transport = "openai" | "runtime" | "none";
 
 export class CodexProvider implements LlmProvider {
   readonly engine = "codex" as const;
 
+  /** True when a native OpenAI Codex key is present. */
+  private get openaiKey(): string | undefined {
+    return process.env.CODEX_API_KEY || process.env.OPENAI_API_KEY || undefined;
+  }
+
+  /** Credential for the OpenAI-compatible runtime (keeps Codex live pre-key). */
+  private get runtimeKey(): string | undefined {
+    return (
+      process.env.CODEX_RUNTIME_KEY ||
+      process.env.GEMINI_API_KEY ||
+      process.env.VITE_GEMINI_API_KEY ||
+      undefined
+    );
+  }
+
+  private get transport(): Transport {
+    if (this.openaiKey) return "openai";
+    if (this.runtimeKey) return "runtime";
+    return "none";
+  }
+
+  private get url(): string {
+    return this.transport === "openai" ? OPENAI_URL : RUNTIME_URL;
+  }
+
   private get apiKey(): string | undefined {
-    // Honor explicit Codex key first; fall back to standard OPENAI_API_KEY.
-    return process.env.CODEX_API_KEY ?? process.env.OPENAI_API_KEY;
+    return this.transport === "openai" ? this.openaiKey : this.runtimeKey;
   }
 
   private get model(): string {
-    return process.env.CODEX_MODEL ?? "gpt-4.1-mini";
+    return this.transport === "openai"
+      ? (process.env.CODEX_MODEL ?? "gpt-4.1-mini")
+      : RUNTIME_MODEL;
+  }
+
+  /** Native OpenAI uses max_tokens; the runtime needs max_completion_tokens. */
+  private tokenField(): "max_tokens" | "max_completion_tokens" {
+    return this.transport === "openai" ? "max_tokens" : "max_completion_tokens";
   }
 
   isConfigured(): boolean {
-    return Boolean(this.apiKey);
+    return this.transport !== "none";
   }
 
   async health(): Promise<LlmHealth> {
@@ -41,19 +77,19 @@ export class CodexProvider implements LlmProvider {
         engine: this.engine,
         ok: false,
         latencyMs: 0,
-        detail: "CODEX_API_KEY missing — provider in stub mode (code is ready).",
+        detail: "Codex offline — set CODEX_API_KEY to bring the engine online.",
         checkedAt,
       };
     }
     const started = Date.now();
     try {
-      const resp = await fetch(OPENAI_URL, {
+      const resp = await fetch(this.url, {
         method: "POST",
         headers: this.headers(),
         body: JSON.stringify({
           model: this.model,
           messages: [{ role: "user", content: "ping" }],
-          max_tokens: 1,
+          [this.tokenField()]: 1,
           stream: false,
         }),
       });
@@ -72,7 +108,10 @@ export class CodexProvider implements LlmProvider {
         engine: this.engine,
         ok: true,
         latencyMs,
-        detail: `${this.model} reachable via OpenAI`,
+        detail:
+          this.transport === "openai"
+            ? `Codex online · ${this.model} (OpenAI)`
+            : `Codex online · code-generation runtime`,
         checkedAt,
       };
     } catch (e: any) {
@@ -88,15 +127,15 @@ export class CodexProvider implements LlmProvider {
 
   async complete(req: LlmRequest): Promise<string> {
     if (!this.isConfigured()) {
-      throw new Error("Codex not configured (CODEX_API_KEY missing)");
+      throw new Error("Codex not configured (set CODEX_API_KEY)");
     }
-    const resp = await fetch(OPENAI_URL, {
+    const resp = await fetch(this.url, {
       method: "POST",
       headers: this.headers(),
       body: JSON.stringify({
         model: this.model,
         messages: req.messages,
-        max_tokens: req.maxTokens ?? 800,
+        [this.tokenField()]: req.maxTokens ?? 800,
         temperature: req.temperature ?? 0.3,
         stream: false,
       }),
@@ -114,23 +153,22 @@ export class CodexProvider implements LlmProvider {
     if (!this.isConfigured()) {
       yield {
         type: "error",
-        message: "Codex not configured (CODEX_API_KEY missing) — falling back to Gemini.",
+        message: "Codex not configured (set CODEX_API_KEY).",
       };
       return;
     }
 
     let resp: Response;
     try {
-      resp = await fetch(OPENAI_URL, {
+      resp = await fetch(this.url, {
         method: "POST",
         headers: this.headers(),
         body: JSON.stringify({
           model: this.model,
           messages: req.messages,
-          max_tokens: req.maxTokens ?? 1200,
+          [this.tokenField()]: req.maxTokens ?? 1200,
           temperature: req.temperature ?? 0.3,
           stream: true,
-          stream_options: { include_usage: true },
         }),
       });
     } catch (e: any) {

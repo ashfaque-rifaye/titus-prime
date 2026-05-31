@@ -44,12 +44,8 @@ export async function runSubscription(args: {
     mode,
   });
 
-  const urgent = SUBSCRIPTIONS.filter(
-    (s) => s.cancelWindowClosesIn <= 7 && !s.essential,
-  );
-  const pausable = SUBSCRIPTIONS.filter(
-    (s) => !s.essential && s.monthlyCost <= 300,
-  );
+  const urgent = SUBSCRIPTIONS.filter((s) => s.cancelWindowClosesIn <= 7 && !s.essential);
+  const pausable = SUBSCRIPTIONS.filter((s) => !s.essential && s.monthlyCost <= 300);
   const earlyPay = crisisMode ? [] : VENDORS.filter((v) => v.discountPct > 0 && v.daysLeft <= 10);
 
   if (urgent.length > 0) {
@@ -60,7 +56,9 @@ export async function runSubscription(args: {
       agent: "subscription",
       severity: "alert",
       title: `${urgent.length} urgent renewal${urgent.length === 1 ? "" : "s"} closing`,
-      detail: urgent.map((s) => `${s.vendor}: window closes in ${s.cancelWindowClosesIn}d`).join(" · "),
+      detail: urgent
+        .map((s) => `${s.vendor}: window closes in ${s.cancelWindowClosesIn}d`)
+        .join(" · "),
       data: { vendors: urgent.map((s) => s.vendor) },
     });
   }

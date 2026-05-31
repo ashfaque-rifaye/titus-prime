@@ -47,7 +47,8 @@ export async function runCollection(args: {
     runId,
     from: "collection",
     skillKey: "segment_customers",
-    intent: "Classify overdue customers as chronic-late vs. one-time delay; rank by recoverable cash.",
+    intent:
+      "Classify overdue customers as chronic-late vs. one-time delay; rank by recoverable cash.",
     mode,
   });
   const drafter = await runSkill({
@@ -98,10 +99,7 @@ export function buildCollectionActions(finding: CollectionFinding): ProposedActi
   }));
 }
 
-function prioritize(
-  inv: Invoice[],
-  ctx: { crisisMode: boolean; shortfall: number },
-): Invoice[] {
+function prioritize(inv: Invoice[], ctx: { crisisMode: boolean; shortfall: number }): Invoice[] {
   const sorted = [...inv].sort((a, b) => {
     if (ctx.crisisMode) {
       // Maximize recoverable amount first, then days late.

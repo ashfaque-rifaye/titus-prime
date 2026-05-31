@@ -63,7 +63,10 @@ export function CsvUpload({ onIngested }: { onIngested?: (r: IngestResult) => vo
         <span className="text-[11px] text-muted-foreground mono">CSV · ≤ 2MB</span>
       </div>
       <div
-        onDragOver={(e) => { e.preventDefault(); setHover(true); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setHover(true);
+        }}
         onDragLeave={() => setHover(false)}
         onDrop={async (e) => {
           e.preventDefault();
@@ -73,7 +76,9 @@ export function CsvUpload({ onIngested }: { onIngested?: (r: IngestResult) => vo
         }}
         onClick={() => inputRef.current?.click()}
         className={`cursor-pointer rounded-lg border-2 border-dashed p-6 text-center transition-colors ${
-          hover ? "border-primary/60 bg-primary/5" : "border-border bg-background/40 hover:border-primary/40"
+          hover
+            ? "border-primary/60 bg-primary/5"
+            : "border-border bg-background/40 hover:border-primary/40"
         }`}
       >
         <input
@@ -86,12 +91,18 @@ export function CsvUpload({ onIngested }: { onIngested?: (r: IngestResult) => vo
         <div className="text-2xl">📄</div>
         <p className="mt-2 text-sm">
           {busy ? (
-            <span className="text-muted-foreground">Inspecting <span className="mono">{filename}</span> …</span>
+            <span className="text-muted-foreground">
+              Inspecting <span className="mono">{filename}</span> …
+            </span>
           ) : filename ? (
-            <span><span className="mono accent-text">{filename}</span> ingested · drop another to replace</span>
+            <span>
+              <span className="mono accent-text">{filename}</span> ingested · drop another to
+              replace
+            </span>
           ) : (
             <span className="text-muted-foreground">
-              Drop a Stripe export, bank CSV, or subscription tracker. Codex Prime infers the schema.
+              Drop a Stripe export, bank CSV, or subscription tracker. Codex Prime infers the
+              schema.
             </span>
           )}
         </p>
@@ -121,7 +132,9 @@ export function CsvUpload({ onIngested }: { onIngested?: (r: IngestResult) => vo
                     <span className="mono text-[12px] text-foreground truncate">{c.name}</span>
                     <span className="text-[10px] mono accent-text uppercase">{c.type}</span>
                   </div>
-                  {c.meaning && <div className="text-[11px] text-muted-foreground mt-0.5">{c.meaning}</div>}
+                  {c.meaning && (
+                    <div className="text-[11px] text-muted-foreground mt-0.5">{c.meaning}</div>
+                  )}
                   {!c.meaning && (
                     <div className="text-[10.5px] text-muted-foreground mt-0.5 truncate mono">
                       e.g. {c.samples.slice(0, 3).join(" · ")}

@@ -33,7 +33,11 @@ const INR_FMT_PAISE = new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 2,
 });
 
-export function formatMoney(value: number, currency: Currency = "USD", opts?: { precise?: boolean }): string {
+export function formatMoney(
+  value: number,
+  currency: Currency = "USD",
+  opts?: { precise?: boolean },
+): string {
   if (currency === "INR") {
     return opts?.precise ? INR_FMT_PAISE.format(value) : INR_FMT.format(value);
   }

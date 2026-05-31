@@ -13,6 +13,7 @@ import { ThemeProvider } from "@/lib/theme";
 import { Toaster } from "sonner";
 import { TopNav } from "@/components/TopNav";
 import { Footer } from "@/components/Footer";
+import { VoiceAssistant } from "@/components/VoiceAssistant";
 
 function NotFoundComponent() {
   return (
@@ -77,10 +78,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "Titus-Prime · Autonomous Financial Operations Agent" },
-      { name: "description", content: "An autonomous, multi-agent CFO that writes its own Python skills to run treasury, collections, subscriptions, tax, and scenario planning for SaaS founders." },
+      {
+        name: "description",
+        content:
+          "An autonomous, multi-agent CFO that writes its own Python skills to run treasury, collections, subscriptions, tax, and scenario planning for SaaS founders.",
+      },
       { name: "author", content: "Titus-Prime" },
       { property: "og:title", content: "Titus-Prime · Autonomous Financial Operations Agent" },
-      { property: "og:description", content: "Cinematic boardroom for an autonomous, code-writing CFO." },
+      {
+        property: "og:description",
+        content: "Cinematic boardroom for an autonomous, code-writing CFO.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
@@ -126,7 +134,9 @@ function RootComponent() {
           </main>
           <Footer />
         </div>
-        <Toaster theme="dark" position="bottom-right" richColors />
+        <Toaster theme="dark" position="top-right" richColors />
+        {/* Global voice assistant — bottom-right widget on every page. */}
+        <VoiceAssistant />
       </ThemeProvider>
     </QueryClientProvider>
   );

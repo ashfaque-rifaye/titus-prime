@@ -1,23 +1,23 @@
 /**
  * HealthBadge
  *
- * Polls /api/llm/health and renders the live status of both engines in the top
- * navigation. Click for a popover with full diagnostics.
+ * Polls /api/llm/health and renders the live status of the Codex engine in the
+ * top navigation. Click for a popover with full diagnostics.
  */
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
 type Health = {
-  engine: "gemini" | "codex";
+  engine: "codex";
   ok: boolean;
   latencyMs: number;
   detail: string;
   checkedAt: string;
 };
 type HealthResponse = {
-  primary: "gemini" | "codex";
-  fallback: "gemini" | "codex";
-  active: "gemini" | "codex";
+  primary: "codex";
+  fallback: "codex";
+  active: "codex";
   results: Health[];
 };
 
@@ -57,7 +57,9 @@ export function HealthBadge() {
         title="LLM health"
       >
         <span className="relative inline-flex h-2 w-2">
-          <span className={`absolute inset-0 rounded-full ${ok ? "bg-emerald-400" : "bg-rose-400"}`} />
+          <span
+            className={`absolute inset-0 rounded-full ${ok ? "bg-emerald-400" : "bg-rose-400"}`}
+          />
           <motion.span
             key={pulse}
             initial={{ opacity: 0.7, scale: 1 }}
@@ -79,21 +81,28 @@ export function HealthBadge() {
           >
             <div className="mb-2 flex items-center justify-between">
               <div className="font-semibold">LLM Engines</div>
-              <button onClick={() => check()} className="text-[10px] mono text-muted-foreground hover:text-foreground">
+              <button
+                onClick={() => check()}
+                className="text-[10px] mono text-muted-foreground hover:text-foreground"
+              >
                 refresh
               </button>
             </div>
             {data.results.map((r) => (
-              <div key={r.engine} className="rounded-md border border-border bg-background/60 p-2 mb-1.5 last:mb-0">
+              <div
+                key={r.engine}
+                className="rounded-md border border-border bg-background/60 p-2 mb-1.5 last:mb-0"
+              >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className={`h-1.5 w-1.5 rounded-full ${r.ok ? "bg-emerald-400" : "bg-rose-400"}`} />
+                    <span
+                      className={`h-1.5 w-1.5 rounded-full ${r.ok ? "bg-emerald-400" : "bg-rose-400"}`}
+                    />
                     <span className="mono">{r.engine}</span>
                     {r.engine === data.active && (
-                      <span className="rounded bg-primary/15 px-1 py-px text-[9px] accent-text">ACTIVE</span>
-                    )}
-                    {r.engine === data.fallback && r.engine !== data.active && (
-                      <span className="rounded bg-amber-500/15 px-1 py-px text-[9px] text-amber-300">FALLBACK</span>
+                      <span className="rounded bg-primary/15 px-1 py-px text-[9px] accent-text">
+                        ACTIVE
+                      </span>
                     )}
                   </div>
                   <span className="text-muted-foreground">{r.latencyMs}ms</span>
@@ -101,9 +110,7 @@ export function HealthBadge() {
                 <div className="mt-1 text-muted-foreground line-clamp-2">{r.detail}</div>
               </div>
             ))}
-            <div className="mt-2 text-[10px] mono text-muted-foreground">
-              primary: {data.primary} · fallback: {data.fallback}
-            </div>
+            <div className="mt-2 text-[10px] mono text-muted-foreground">engine: {data.active}</div>
           </motion.div>
         )}
       </AnimatePresence>

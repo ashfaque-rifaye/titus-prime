@@ -27,19 +27,9 @@ export type ConnectorId =
   | "zoho"
   | "csv";
 
-export type ConnectorCategory =
-  | "payments"
-  | "banking"
-  | "crm"
-  | "accounting"
-  | "email"
-  | "comms";
+export type ConnectorCategory = "payments" | "banking" | "crm" | "accounting" | "email" | "comms";
 
-export type ConnectionStatus =
-  | "disconnected"
-  | "connected"
-  | "syncing"
-  | "error";
+export type ConnectionStatus = "disconnected" | "connected" | "syncing" | "error";
 
 export type CanonicalInflow = {
   /** stable connector-prefixed id, e.g. "stripe_inv_1042" */
@@ -97,6 +87,17 @@ export type CanonicalBankBalance = {
   asOf: string;
 };
 
+/**
+ * What changed since the previous sync. Powers the "live" feel in the Boardroom
+ * — every sync surfaces real deltas and a short feed of freshly-picked-up items.
+ */
+export type SnapshotChanges = {
+  cashDeltaUsd: number;
+  arDeltaUsd: number;
+  apDeltaUsd: number;
+  newActivity: Array<{ source: ConnectorId | "system"; label: string; amountUsd?: number }>;
+};
+
 export type CanonicalSnapshot = {
   inflows: CanonicalInflow[];
   outflows: CanonicalOutflow[];
@@ -109,6 +110,12 @@ export type CanonicalSnapshot = {
     apUsd: number;
     monthlySubsUsd: number;
   };
+  /** Monotonic counter — increments on every sync (optional; set by registry). */
+  syncSeq?: number;
+  /** Unix ms of the most recent sync. */
+  lastSyncAt?: number | null;
+  /** Deltas + freshly-ingested items vs. the previous snapshot. */
+  changes?: SnapshotChanges;
 };
 
 export type SyncResult = {
@@ -127,7 +134,7 @@ export interface Connector {
   readonly icon: string;
   readonly description: string;
   /** Human-readable region badges, e.g. ["US", "IN"] */
-  readonly regions: ("US" | "IN" | "EU" | "Global")[];
+  readonly regions: readonly ("US" | "IN" | "EU" | "Global")[];
   /** Whether the connector is structurally ready (real sandbox vs. mocked) */
   isReal(): boolean;
   /** Returns true if credentials are present in env. */

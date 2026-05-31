@@ -7,10 +7,12 @@ import { TreasurySection } from "@/components/TreasurySection";
 import { AskMode } from "@/components/AskMode";
 import { AgentArtifact } from "@/components/AgentArtifact";
 import { AgentConsole } from "@/components/AgentConsole";
-import { ApprovalQueue } from "@/components/ApprovalQueue";
-import { SkillLibrarySidebar } from "@/components/SkillLibrarySidebar";
+import { CloudFinOpsPanel } from "@/components/CloudFinOpsPanel";
 import { CsvUpload } from "@/components/CsvUpload";
 import { LiveWorkshop } from "@/components/LiveWorkshop";
+import { ValueScoreboard } from "@/components/ValueScoreboard";
+import { AnomalyFeed } from "@/components/AnomalyFeed";
+import { WhatIfPanel } from "@/components/WhatIfPanel";
 import { SKILL_TEMPLATES } from "@/lib/skill-templates";
 import { formatMoney, formatCompact } from "@/lib/currency";
 import { toast } from "sonner";
@@ -27,7 +29,11 @@ export const Route = createFileRoute("/app")({
   head: () => ({
     meta: [
       { title: "Boardroom · Titus-Prime" },
-      { name: "description", content: "Autonomous CFO cockpit — connectors, treasury solvency, ask mode, and agent artifacts." },
+      {
+        name: "description",
+        content:
+          "Autonomous CFO cockpit — action-only view with connectors, treasury solvency, and agent artifacts.",
+      },
     ],
   }),
   component: Boardroom,
@@ -37,11 +43,11 @@ function Boardroom() {
   const [snapshot, setSnapshot] = useState<SnapshotPayload | null>(null);
   const [csvOpen, setCsvOpen] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [valueRefresh, setValueRefresh] = useState(0);
   const [sweeping, setSweeping] = useState(false);
   const [liveSkill, setLiveSkill] = useState<{ skillKey: string; code: string } | null>(null);
   const consoleRef = useRef<{ start: () => void } | null>(null);
 
-  // Hydrate snapshot once on mount (ConnectionsPanel will trigger sync separately).
   useEffect(() => {
     let cancelled = false;
     async function load() {
@@ -62,11 +68,20 @@ function Boardroom() {
 
   const onConnectorsSynced = useCallback(() => {
     setRefreshKey((k) => k + 1);
+    setValueRefresh((k) => k + 1);
+  }, []);
+
+  // After an agent sweep completes, the ledger has new value events — refresh.
+  const onSweepDone = useCallback(() => {
+    setSweeping(false);
+    setValueRefresh((k) => k + 1);
   }, []);
 
   const onCodexToken = useCallback((skillKey: string, delta: string) => {
     setLiveSkill((cur) =>
-      !cur || cur.skillKey !== skillKey ? { skillKey, code: delta } : { skillKey, code: cur.code + delta },
+      !cur || cur.skillKey !== skillKey
+        ? { skillKey, code: delta }
+        : { skillKey, code: cur.code + delta },
     );
   }, []);
 
@@ -80,7 +95,6 @@ function Boardroom() {
     else toast.error(`Customization failed (${r.status})`);
   }
 
-  // Trigger orchestrator run via the AgentConsole component's exposed method.
   const triggerSweep = useCallback(() => {
     consoleRef.current?.start();
   }, []);
@@ -97,8 +111,11 @@ function Boardroom() {
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">The Boardroom</h1>
           <p className="text-sm text-muted-foreground">
-            Live cockpit · {snapshot?.banks.length ?? 0} bank{snapshot?.banks.length === 1 ? "" : "s"} · {snapshot?.inflows.length ?? 0} open AR · {snapshot?.outflows.length ?? 0} AP · {snapshot?.subscriptions.length ?? 0} subscriptions
-        </p>
+            Action-only cockpit · {snapshot?.banks.length ?? 0} bank
+            {snapshot?.banks.length === 1 ? "" : "s"} · {snapshot?.inflows.length ?? 0} open AR ·{" "}
+            {snapshot?.outflows.length ?? 0} AP · {snapshot?.subscriptions.length ?? 0}{" "}
+            subscriptions
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Kpi label="Cash" value={cashFmt} tone="primary" />
@@ -116,21 +133,30 @@ function Boardroom() {
         </div>
       </div>
 
+      {/* Value Scoreboard — the "Money Found" receipt. The answer to "what did this get me?" */}
+      <ValueScoreboard refreshKey={valueRefresh} />
+
       {/* Connections — top of fold, auto-syncs on mount */}
       <ConnectionsPanel onSynced={onConnectorsSynced} />
 
+      {/* Cloud cost summary */}
+      <CloudFinOpsPanel />
+
       <div className="grid gap-4 lg:grid-cols-[1fr_520px]">
-        {/* LEFT — primary cockpit */}
+        {/* LEFT — action-only cockpit */}
         <div className="space-y-4">
           <TreasurySection onRunSweep={triggerSweep} sweeping={sweeping} refreshKey={refreshKey} />
 
-          <AskMode />
+          <div className="grid gap-3 md:grid-cols-2">
+            <AskMode />
+            <WhatIfPanel />
+          </div>
 
-          {/* Agent artifacts grid */}
+          {/* Actionable agent artifacts — only Collection + Subscription */}
           <div className="grid gap-3 md:grid-cols-2">
             <AgentArtifact
               kind="collection"
-              title="📨 Collection · top draft"
+              title="Collection · email draft"
               skill={SKILL_TEMPLATES.draft_email}
               data={{
                 tone: "firm",
@@ -148,7 +174,7 @@ function Boardroom() {
             />
             <AgentArtifact
               kind="subscription"
-              title="📋 Subscription · upcoming actions"
+              title="Subscription · actions needed"
               skill={SKILL_TEMPLATES.renewal_scan}
               data={{
                 subscriptions: (snapshot?.subscriptions ?? []).slice(0, 3).map((s: any) => ({
@@ -161,73 +187,28 @@ function Boardroom() {
               }}
               onCustomize={(i) => customizeAgent("subscription", i)}
             />
-            <AgentArtifact
-              kind="tax"
-              title="🏛 Tax · multi-state nexus"
-              skill={SKILL_TEMPLATES.tx_saas_calc}
-              data={{
-                states: [
-                  { state: "CA", revenueYTD: 84_300, threshold: 500_000, nexusCrossed: false, taxOwed: 0 },
-                  { state: "TX", revenueYTD: 100_200, threshold: 100_000, nexusCrossed: true, taxOwed: 1420.5 },
-                  { state: "NY", revenueYTD: 62_800, threshold: 500_000, nexusCrossed: false, taxOwed: 0 },
-                  { state: "FL", revenueYTD: 47_900, threshold: 100_000, nexusCrossed: false, taxOwed: 0 },
-                ],
-                preFilled: {
-                  state: "Texas",
-                  period: "Q4 2026",
-                  base: 100_200 * 0.8,
-                  rate: 0.0625 + 0.0194,
-                  owed: 1420.5,
-                  citation: "TX Tax Code 151.0101 · SaaS taxable as data-processing service · 20% exemption",
-                },
-              }}
-              onCustomize={(i) => customizeAgent("tax", i)}
-            />
-            <AgentArtifact
-              kind="scenario"
-              title="📊 Scenario · ranked plans"
-              skill={SKILL_TEMPLATES.optimize_survival}
-              data={{
-                plans: [
-                  { name: "Plan A · Aggressive collect + pause", successPct: 92, bufferGain: 19_078, rationale: "Maximizes recoverable cash under high success probability." },
-                  { name: "Plan B · Vendor delay", successPct: 85, bufferGain: 14_210, rationale: "Buys time without irritating customers." },
-                  { name: "Plan C · Bridge line", successPct: 78, bufferGain: 16_970, rationale: "Smallest behavioral change but draws on credit." },
-                ],
-              }}
-              onCustomize={(i) => customizeAgent("scenario", i)}
-            />
           </div>
-
-          {/* Treasury knobs (artifact for treasury) */}
-          <AgentArtifact
-            kind="treasury"
-            title="🔭 Treasury · assumption knobs"
-            skill={SKILL_TEMPLATES.cash_forecast}
-            data={{ assumptions: { floor: 5000, payrollDay: 15, payrollAmount: 22_000, recoveryPct: 50 } }}
-            onCustomize={(i) => customizeAgent("treasury", i)}
-          />
 
           {/* Live agent transcript */}
           <AgentConsoleHandle
             ref={consoleRef as any}
             onCodexToken={onCodexToken}
             onSweepingChange={setSweeping}
+            onRunCompleted={onSweepDone}
           />
-
-          {/* Approvals */}
-          <ApprovalQueue />
         </div>
 
-        {/* RIGHT — workshop + library */}
+        {/* RIGHT — live workshop + sentinel */}
         <div className="space-y-4 lg:sticky lg:top-16 lg:self-start">
           <div className="rounded-xl border border-border bg-surface/60 overflow-hidden h-[460px]">
             {liveSkill ? (
               <LiveWorkshop skillKey={liveSkill.skillKey} code={liveSkill.code} />
             ) : (
-              <IdleWorkshop />
+              <PendingActionsPanel />
             )}
           </div>
-          <SkillLibrarySidebar />
+          {/* Sentinel — proactive anomaly feed */}
+          <AnomalyFeed refreshKey={valueRefresh} />
         </div>
       </div>
 
@@ -249,7 +230,9 @@ function Boardroom() {
               className="w-full max-w-xl"
             >
               <div className="flex items-center justify-between mb-2">
-                <div className="text-xs mono text-muted-foreground">One-off CSV import (fallback)</div>
+                <div className="text-xs mono text-muted-foreground">
+                  One-off CSV import (fallback)
+                </div>
                 <button
                   onClick={() => setCsvOpen(false)}
                   className="rounded-md border border-border bg-surface px-2 py-1 text-xs hover:text-foreground text-muted-foreground"
@@ -266,12 +249,23 @@ function Boardroom() {
   );
 }
 
-function Kpi({ label, value, tone }: { label: string; value: string; tone: "primary" | "rose" | "indigo" | "amber" }) {
+function Kpi({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone: "primary" | "rose" | "indigo" | "amber";
+}) {
   const color =
-    tone === "primary" ? "text-primary" :
-    tone === "rose" ? "text-rose-300" :
-    tone === "amber" ? "text-amber-300" :
-    "text-indigo-300";
+    tone === "primary"
+      ? "text-primary"
+      : tone === "rose"
+        ? "text-rose-300"
+        : tone === "amber"
+          ? "text-amber-300"
+          : "text-indigo-300";
   return (
     <div className="rounded-md border border-border bg-surface/60 px-3 py-1.5">
       <div className="text-[9px] mono uppercase tracking-wider text-muted-foreground">{label}</div>
@@ -280,15 +274,86 @@ function Kpi({ label, value, tone }: { label: string; value: string; tone: "prim
   );
 }
 
-function IdleWorkshop() {
+/* ─────────────────  Pending Actions Panel (replaces Activity Log)  ───────────────── */
+
+import { AlertTriangle, CheckCircle2, Clock, Calendar, Mail, ArrowRight } from "lucide-react";
+
+function PendingActionsPanel() {
+  const actions = [
+    {
+      id: 1,
+      urgency: "high" as const,
+      title: "Slack Enterprise cancel window closes",
+      detail: "2 days remaining · Annual auto-renew · $1,200/mo",
+      agent: "Subscription",
+      icon: <Calendar className="h-3.5 w-3.5" />,
+    },
+    {
+      id: 2,
+      urgency: "high" as const,
+      title: "INV-1042 overdue email pending approval",
+      detail: "Acme Robotics · $8,200 · 14 days late · Draft ready",
+      agent: "Collection",
+      icon: <Mail className="h-3.5 w-3.5" />,
+    },
+    {
+      id: 3,
+      urgency: "medium" as const,
+      title: "Notion cancel window in 5 days",
+      detail: "Annual auto-renew · $240/mo · No penalty",
+      agent: "Subscription",
+      icon: <Calendar className="h-3.5 w-3.5" />,
+    },
+    {
+      id: 4,
+      urgency: "low" as const,
+      title: "INV-1029 friendly nudge queued",
+      detail: "Nimbus Health · $1,450 · 28 days late",
+      agent: "Collection",
+      icon: <Mail className="h-3.5 w-3.5" />,
+    },
+  ];
+
+  const urgencyStyle = {
+    high: "border-rose-500/30 bg-rose-500/5 text-rose-300",
+    medium: "border-amber-500/30 bg-amber-500/5 text-amber-300",
+    low: "border-border bg-background/40 text-muted-foreground",
+  };
+
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-3 p-8 text-center">
-      <div className="grid h-14 w-14 place-items-center rounded-xl bg-surface text-2xl">💻</div>
-      <h3 className="text-base font-semibold">Workshop is idle</h3>
-      <p className="max-w-sm text-sm text-muted-foreground">
-        Click <span className="accent-text">Run all agents</span> in the Treasury panel.
-        Codex Prime will compose Python skills for each specialist — token by token.
-      </p>
+    <div className="flex h-full flex-col">
+      <div className="border-b border-border bg-background/40 px-4 py-3">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mono flex items-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-rose-500 pulse-dot" />
+          Pending Actions
+          <span className="rounded-full bg-rose-500/15 text-rose-300 px-2 py-0.5 text-[10px]">
+            {actions.filter((a) => a.urgency === "high").length} urgent
+          </span>
+        </h3>
+      </div>
+      <div className="flex-1 overflow-auto p-4 space-y-2.5 scrollbar-thin">
+        {actions.map((action) => (
+          <div key={action.id} className={`rounded-lg border p-3 ${urgencyStyle[action.urgency]}`}>
+            <div className="flex items-start gap-2.5">
+              <div className="mt-0.5 shrink-0">{action.icon}</div>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-semibold text-foreground">{action.title}</span>
+                  {action.urgency === "high" && (
+                    <AlertTriangle className="h-3 w-3 text-rose-400 shrink-0" />
+                  )}
+                </div>
+                <div className="mt-0.5 text-[11px] text-muted-foreground">{action.detail}</div>
+                <div className="mt-1.5 flex items-center gap-1 text-[10px] mono text-muted-foreground">
+                  <span>{action.agent} Agent</span>
+                  <ArrowRight className="h-2.5 w-2.5" />
+                  <span className="text-foreground/70">Action required</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -298,8 +363,12 @@ import { forwardRef, useImperativeHandle } from "react";
 
 const AgentConsoleHandle = forwardRef<
   { start: () => void },
-  { onCodexToken: (skillKey: string, delta: string) => void; onSweepingChange: (v: boolean) => void }
->(function AgentConsoleHandle({ onCodexToken, onSweepingChange }, ref) {
+  {
+    onCodexToken: (skillKey: string, delta: string) => void;
+    onSweepingChange: (v: boolean) => void;
+    onRunCompleted?: () => void;
+  }
+>(function AgentConsoleHandle({ onCodexToken, onSweepingChange, onRunCompleted }, ref) {
   const innerStart = useRef<(() => void) | null>(null);
   useImperativeHandle(ref, () => ({
     start: () => innerStart.current?.(),
@@ -309,7 +378,10 @@ const AgentConsoleHandle = forwardRef<
       mode="stream"
       onCodexToken={onCodexToken}
       onRunStarted={() => onSweepingChange(true)}
-      onRunCompleted={() => onSweepingChange(false)}
+      onRunCompleted={() => {
+        onSweepingChange(false);
+        onRunCompleted?.();
+      }}
       registerStarter={(fn) => (innerStart.current = fn)}
     />
   );

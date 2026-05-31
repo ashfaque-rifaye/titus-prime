@@ -12,6 +12,7 @@
 import type {
   Connector,
   CanonicalSnapshot,
+  SnapshotChanges,
   SyncResult,
   ConnectorId,
 } from "./types";
@@ -24,12 +25,7 @@ import {
   ZohoBooksConnector,
   RazorpayConnector,
 } from "./quickbooks";
-import {
-  GmailConnector,
-  OutlookConnector,
-  SlackConnector,
-  TeamsConnector,
-} from "./saas-trackers";
+import { GmailConnector, OutlookConnector, SlackConnector, TeamsConnector } from "./saas-trackers";
 
 const REGISTRY: Connector[] = [
   new StripeConnector(),
@@ -46,10 +42,11 @@ const REGISTRY: Connector[] = [
 ];
 
 declare global {
-  // eslint-disable-next-line no-var
   var __TITUS_SNAPSHOT__: CanonicalSnapshot | undefined;
-  // eslint-disable-next-line no-var
+
   var __TITUS_LAST_SYNC__: Record<string, number> | undefined;
+
+  var __TITUS_SYNC_SEQ__: number | undefined;
 }
 
 function emptySnapshot(): CanonicalSnapshot {
@@ -88,9 +85,7 @@ export type SyncReport = {
   snapshot: CanonicalSnapshot;
 };
 
-export async function syncAll(opts?: {
-  only?: ConnectorId[];
-}): Promise<SyncReport> {
+export async function syncAll(opts?: { only?: ConnectorId[] }): Promise<SyncReport> {
   const startedAt = new Date().toISOString();
   const t0 = Date.now();
   const subset = opts?.only ? REGISTRY.filter((c) => opts.only!.includes(c.id)) : REGISTRY;
@@ -150,6 +145,12 @@ export async function syncAll(opts?: {
     }
   }
 
+  // Live demo motion: apply small, deterministic per-sync drift so the
+  // Boardroom feels alive (balances settle, invoices age) without a live feed.
+  const prev = globalThis.__TITUS_SNAPSHOT__;
+  const seq = (globalThis.__TITUS_SYNC_SEQ__ ?? 0) + 1;
+  applyLiveness(seq, snap);
+
   // Compute totals (USD)
   snap.totals.cashUsd = snap.banks.reduce((s, b) => s + b.balanceUsd, 0);
   snap.totals.arUsd = snap.inflows
@@ -158,8 +159,13 @@ export async function syncAll(opts?: {
   snap.totals.apUsd = snap.outflows.reduce((s, o) => s + o.amountUsd, 0);
   snap.totals.monthlySubsUsd = snap.subscriptions.reduce((s, x) => s + x.monthlyCostUsd, 0);
 
+  snap.syncSeq = seq;
+  snap.lastSyncAt = Date.now();
+  snap.changes = computeChanges(prev, snap, seq);
+
   globalThis.__TITUS_SNAPSHOT__ = snap;
   globalThis.__TITUS_LAST_SYNC__ = lastSync;
+  globalThis.__TITUS_SYNC_SEQ__ = seq;
 
   const endedAt = new Date().toISOString();
   return {
@@ -169,6 +175,67 @@ export async function syncAll(opts?: {
     results,
     snapshot: snap,
   };
+}
+
+/**
+ * Apply bounded, deterministic drift so each sync shows movement:
+ *   • bank balances oscillate within ±0.4% (settlements, sweeps)
+ *   • the two most-overdue invoices age by 0..3 days (realistic AR aging)
+ * Fixtures are rebuilt fresh every sync, so nothing accumulates unboundedly.
+ */
+function applyLiveness(seq: number, snap: CanonicalSnapshot): void {
+  snap.banks.forEach((b, i) => {
+    const drift = b.balanceUsd * 0.004 * Math.sin(seq * 1.3 + i);
+    b.balanceUsd = Math.round(b.balanceUsd + drift);
+  });
+  const aging = seq % 4;
+  [...snap.inflows]
+    .filter((i) => i.status !== "paid")
+    .sort((a, b) => b.daysLate - a.daysLate)
+    .slice(0, 2)
+    .forEach((inv) => {
+      inv.daysLate += aging;
+    });
+}
+
+/** Diff new totals vs. the previous snapshot and synthesize an activity feed. */
+function computeChanges(
+  prev: CanonicalSnapshot | undefined,
+  snap: CanonicalSnapshot,
+  seq: number,
+): SnapshotChanges {
+  const cashDeltaUsd = Math.round(
+    snap.totals.cashUsd - (prev?.totals.cashUsd ?? snap.totals.cashUsd),
+  );
+  const arDeltaUsd = Math.round(snap.totals.arUsd - (prev?.totals.arUsd ?? snap.totals.arUsd));
+  const apDeltaUsd = Math.round(snap.totals.apUsd - (prev?.totals.apUsd ?? snap.totals.apUsd));
+
+  const newActivity: SnapshotChanges["newActivity"] = [];
+  const openInflows = snap.inflows.filter((i) => i.status !== "paid");
+  if (openInflows.length) {
+    const inv = openInflows[seq % openInflows.length];
+    newActivity.push({
+      source: inv.source,
+      label: `${inv.customer} · invoice now ${inv.daysLate}d past due`,
+      amountUsd: Math.round(inv.amountUsd),
+    });
+  }
+  if (snap.banks.length) {
+    const b = snap.banks[seq % snap.banks.length];
+    newActivity.push({
+      source: b.source,
+      label: `${b.account} · balance refreshed`,
+      amountUsd: Math.round(b.balanceUsd),
+    });
+  }
+  if (cashDeltaUsd !== 0 && prev) {
+    newActivity.push({
+      source: "system",
+      label: `Net cash moved ${cashDeltaUsd >= 0 ? "up" : "down"} since last sync`,
+      amountUsd: Math.abs(cashDeltaUsd),
+    });
+  }
+  return { cashDeltaUsd, arDeltaUsd, apDeltaUsd, newActivity };
 }
 
 /** Synchronous helper that ensures a snapshot exists (used by agents). */

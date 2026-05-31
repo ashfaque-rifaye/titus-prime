@@ -34,7 +34,10 @@ export function LiveWorkshop({ skillKey, code }: { skillKey: string | null; code
         <span className="text-[10px] mono text-muted-foreground">live</span>
       </div>
       <div className="relative flex-1 overflow-hidden bg-background/40">
-        <pre ref={preRef} className="mono h-full overflow-auto p-4 text-[12.5px] leading-relaxed scrollbar-thin">
+        <pre
+          ref={preRef}
+          className="mono h-full overflow-auto p-4 text-[12.5px] leading-relaxed scrollbar-thin"
+        >
           <code className="text-foreground/90">{code}</code>
           <span className="caret" />
         </pre>

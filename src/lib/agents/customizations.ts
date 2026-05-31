@@ -11,13 +11,11 @@ import { supabaseAdmin } from "../supabase-admin.server";
 import type { AgentId } from "./types";
 
 declare global {
-  // eslint-disable-next-line no-var
   var __TITUS_AGENT_CUSTOMIZATIONS__: Record<string, string> | undefined;
 }
 
 const memoStore = (): Record<string, string> =>
-  globalThis.__TITUS_AGENT_CUSTOMIZATIONS__ ??
-  (globalThis.__TITUS_AGENT_CUSTOMIZATIONS__ = {});
+  globalThis.__TITUS_AGENT_CUSTOMIZATIONS__ ?? (globalThis.__TITUS_AGENT_CUSTOMIZATIONS__ = {});
 
 export async function getCustomization(agent: AgentId): Promise<string | null> {
   try {

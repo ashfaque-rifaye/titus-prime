@@ -93,17 +93,16 @@ export function TreasurySection({
                     Shortfall in <span className="mono accent-text">{breach.day} days</span>
                     <span className="mx-2 text-muted-foreground">·</span>
                     Projected deficit:{" "}
-                    <span className="mono text-rose-300">
-                      ${breach.balance.toLocaleString()}
-                    </span>
+                    <span className="mono text-rose-300">${breach.balance.toLocaleString()}</span>
                     <span className="mx-2 text-muted-foreground">·</span>
                     <span className="mono text-muted-foreground">
                       ${breach.shortfall.toLocaleString()} below floor
                     </span>
                   </div>
                   <div className="text-xs text-muted-foreground mt-1.5 max-w-xl">
-                    Deploy Autopilot Scenario to chase the top {data?.summary.recommendedScenario.chase.length ?? 0} overdue customers,
-                    pause non-essential subscriptions, and protect the safety floor.
+                    Deploy Autopilot Scenario to chase the top{" "}
+                    {data?.summary.recommendedScenario.chase.length ?? 0} overdue customers, pause
+                    non-essential subscriptions, and protect the safety floor.
                   </div>
                 </div>
               </div>
@@ -127,8 +126,12 @@ export function TreasurySection({
             <div className="flex items-center gap-3">
               <CheckCircle2 className="h-5 w-5 text-emerald-400" />
               <div>
-                <div className="text-[11px] mono uppercase tracking-widest text-emerald-300">Operating reserves stable</div>
-                <div className="text-xs text-muted-foreground">No cash shortfall projected within 30 days.</div>
+                <div className="text-[11px] mono uppercase tracking-widest text-emerald-300">
+                  Operating reserves stable
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  No cash shortfall projected within 30 days.
+                </div>
               </div>
             </div>
           </motion.div>
@@ -142,7 +145,8 @@ export function TreasurySection({
           <div className="min-w-0">
             <div className="text-xs font-medium">Run Full Sweep</div>
             <div className="text-[11px] text-muted-foreground">
-              Dispatch all 5 specialist agents through Codex Prime · streams events live to the console.
+              Dispatch all 5 specialist agents through Codex Prime · streams events live to the
+              console.
             </div>
           </div>
         </div>

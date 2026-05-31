@@ -42,7 +42,12 @@ Hard rules:
 - End with an \`if __name__ == "__main__":\` block that prints a one-line human summary.
 - 60-120 lines. Keep it tight.`.trim();
 
-function userPromptFor(skillKey: SkillKey, intent: string, agent: AgentId, customization: string | null): string {
+function userPromptFor(
+  skillKey: SkillKey,
+  intent: string,
+  agent: AgentId,
+  customization: string | null,
+): string {
   const tpl = SKILL_TEMPLATES[skillKey];
   const lines = [
     `Calling agent: ${agent}`,
@@ -106,7 +111,6 @@ export async function runSkill(args: {
     code = tpl.code;
     // Stream the canonical template so the Workshop pane animates uniformly.
     for (const chunk of chunkOf(code, 96)) {
-      code = code; // (no-op, code already set)
       bus.emit({ kind: "codex.token", runId, ts: Date.now(), skillKey, delta: chunk });
       await sleep(8);
     }

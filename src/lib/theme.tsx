@@ -9,18 +9,25 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>("lime");
 
   useEffect(() => {
-    const saved = (typeof window !== "undefined" && (localStorage.getItem("titus-theme") as Theme)) || "lime";
+    const saved =
+      (typeof window !== "undefined" && (localStorage.getItem("titus-theme") as Theme)) || "lime";
     setTheme(saved);
   }, []);
 
   useEffect(() => {
     if (typeof document === "undefined") return;
     document.documentElement.setAttribute("data-theme", theme);
-    try { localStorage.setItem("titus-theme", theme); } catch {}
+    try {
+      localStorage.setItem("titus-theme", theme);
+    } catch {
+      // Ignore storage failures in private browsing or locked-down webviews.
+    }
   }, [theme]);
 
   return (
-    <ThemeCtx.Provider value={{ theme, setTheme, toggle: () => setTheme(theme === "lime" ? "indigo" : "lime") }}>
+    <ThemeCtx.Provider
+      value={{ theme, setTheme, toggle: () => setTheme(theme === "lime" ? "indigo" : "lime") }}
+    >
       {children}
     </ThemeCtx.Provider>
   );

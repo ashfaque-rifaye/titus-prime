@@ -52,7 +52,10 @@ export async function runTax(args: {
       severity: "alert",
       title: `Nexus crossed in ${crossings.length} state${crossings.length === 1 ? "" : "s"}`,
       detail: crossings
-        .map((s) => `${s.state}: $${s.revenueYTD.toLocaleString()} YTD · owes $${s.taxOwed.toFixed(2)}`)
+        .map(
+          (s) =>
+            `${s.state}: $${s.revenueYTD.toLocaleString()} YTD · owes $${s.taxOwed.toFixed(2)}`,
+        )
         .join(" · "),
       data: { totalOwed, states: crossings.map((s) => s.state) },
     });
@@ -65,7 +68,8 @@ export async function runTax(args: {
       severity: "success",
       title: "No new state nexus crossings this scan",
       detail: STATE_REVENUE.map(
-        (s) => `${s.state}: $${s.revenueYTD.toLocaleString()} of ${s.threshold ? "$" + s.threshold.toLocaleString() : "N/A"}`,
+        (s) =>
+          `${s.state}: $${s.revenueYTD.toLocaleString()} of ${s.threshold ? "$" + s.threshold.toLocaleString() : "N/A"}`,
       ).join(" · "),
     });
   }

@@ -8,12 +8,7 @@
 import { bus } from "../event-bus";
 import type { AgentEvent, ProposedAction } from "../types";
 import { runSkill } from "./codex-prime";
-import {
-  CASH_PROJECTION,
-  SAFETY_FLOOR,
-  BANK_BALANCE,
-  PAYROLL,
-} from "../../mock-data";
+import { CASH_PROJECTION, SAFETY_FLOOR, BANK_BALANCE, PAYROLL } from "../../mock-data";
 
 export type TreasuryFinding = {
   crunch: { day: number; balance: number; shortfallVsFloor: number } | null;

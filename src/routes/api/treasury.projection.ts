@@ -52,10 +52,18 @@ export const Route = createFileRoute("/api/treasury/projection")({
               autopilotEndOfMonth: autopilotEnd,
               agentValue: autopilotEnd - standbyEnd,
               breach: breach
-                ? { day: breach.day, balance: breach.balance, shortfall: SAFETY_FLOOR - breach.balance }
+                ? {
+                    day: breach.day,
+                    balance: breach.balance,
+                    shortfall: SAFETY_FLOOR - breach.balance,
+                  }
                 : null,
               recommendedScenario: {
-                chase: topInvoices.map((i) => ({ id: i.id, customer: i.customer, amount: i.amount })),
+                chase: topInvoices.map((i) => ({
+                  id: i.id,
+                  customer: i.customer,
+                  amount: i.amount,
+                })),
                 pause: v.subscriptions.filter((s) => !s.essential).map((s) => s.vendor),
                 delay: v.vendors[0]?.name ?? null,
                 projectedRecovery: recoveredAmount,

@@ -43,7 +43,9 @@ export const Route = createFileRoute("/api/codex/stream")({
           context && `Context: ${context}`,
           "",
           "Generate the Python skill now.",
-        ].filter(Boolean).join("\n");
+        ]
+          .filter(Boolean)
+          .join("\n");
 
         const { active } = selectProvider(body.engine);
 
@@ -81,7 +83,11 @@ export const Route = createFileRoute("/api/codex/stream")({
               sendDelta(`\n# fatal: ${e?.message ?? "unknown"}\n`, active);
               controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
             } finally {
-              try { controller.close(); } catch { /* already closed */ }
+              try {
+                controller.close();
+              } catch {
+                /* already closed */
+              }
             }
           },
         });

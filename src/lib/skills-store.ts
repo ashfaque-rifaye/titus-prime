@@ -61,12 +61,19 @@ export async function commitSkill(key: SkillKey, opts?: { scheduledCron?: string
 
 export function agentColor(agent: AgentId | string): string {
   switch (agent) {
-    case "treasury": return "text-emerald-400";
-    case "collection": return "text-sky-400";
-    case "subscription": return "text-amber-400";
-    case "tax": return "text-rose-400";
-    case "scenario": return "text-violet-400";
-    case "codex": return "text-primary";
-    default: return "text-muted-foreground";
+    case "treasury":
+      return "text-emerald-400";
+    case "collection":
+      return "text-sky-400";
+    case "subscription":
+      return "text-amber-400";
+    case "tax":
+      return "text-rose-400";
+    case "scenario":
+      return "text-violet-400";
+    case "codex":
+      return "text-primary";
+    default:
+      return "text-muted-foreground";
   }
 }

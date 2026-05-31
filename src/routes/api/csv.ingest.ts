@@ -43,7 +43,7 @@ export const Route = createFileRoute("/api/csv/ingest")({
             result = await enrichWithLlm(result);
           } catch (e) {
             // enrichment is best-effort; never fail the upload because of it.
-            // eslint-disable-next-line no-console
+
             console.warn("[csv.ingest] enrichment skipped:", (e as Error)?.message);
           }
         }

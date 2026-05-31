@@ -11,7 +11,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/lib/supabase-admin.server";
 
-const VALID_AGENTS = ["treasury", "collection", "subscription", "tax", "scenario", "codex"] as const;
+const VALID_AGENTS = [
+  "treasury",
+  "collection",
+  "subscription",
+  "tax",
+  "scenario",
+  "codex",
+] as const;
+type ValidAgent = (typeof VALID_AGENTS)[number];
+
+function isValidAgent(agent: string): agent is ValidAgent {
+  return VALID_AGENTS.includes(agent as ValidAgent);
+}
 
 export const Route = createFileRoute("/api/agents/customize")({
   server: {
@@ -28,7 +40,7 @@ export const Route = createFileRoute("/api/agents/customize")({
         }
         const agent = body.agent;
         const instruction = body.instruction?.trim();
-        if (!agent || !VALID_AGENTS.includes(agent as any)) {
+        if (!agent || !isValidAgent(agent)) {
           return new Response(
             JSON.stringify({ error: `agent must be one of ${VALID_AGENTS.join(", ")}` }),
             { status: 400, headers: { "Content-Type": "application/json" } },
@@ -68,7 +80,7 @@ export const Route = createFileRoute("/api/agents/customize")({
         } catch (e: any) {
           // Graceful degrade if the table doesn't exist yet (migration not run).
           // We still acknowledge so the UI can show success in the demo.
-          // eslint-disable-next-line no-console
+
           console.warn("[customize] db write failed, in-memory only:", e?.message);
           memoStore[agent] = instruction;
           return new Response(
@@ -115,9 +127,7 @@ export const Route = createFileRoute("/api/agents/customize")({
 
 // Process-scoped fallback when the migration hasn't run yet.
 declare global {
-  // eslint-disable-next-line no-var
   var __TITUS_AGENT_CUSTOMIZATIONS__: Record<string, string> | undefined;
 }
 const memoStore: Record<string, string> =
-  globalThis.__TITUS_AGENT_CUSTOMIZATIONS__ ??
-  (globalThis.__TITUS_AGENT_CUSTOMIZATIONS__ = {});
+  globalThis.__TITUS_AGENT_CUSTOMIZATIONS__ ?? (globalThis.__TITUS_AGENT_CUSTOMIZATIONS__ = {});

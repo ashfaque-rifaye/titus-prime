@@ -43,3 +43,9 @@ Antigravity generated/
 Open AI x Outskill Hackathon/
 OpenAI*Hackathon*.pdf
 generate_presentation.py
+
+# transient deploy/debug artifacts
+set-vars.json
+redeploy.json
+check-deploy.json
+build-logs*.json
