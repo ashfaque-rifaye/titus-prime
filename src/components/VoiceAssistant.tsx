@@ -7,7 +7,7 @@ import { Mic, Loader2, Volume2, AudioLines, MicOff } from "lucide-react";
  *
  * Pipeline (zero backend dependency for I/O):
  *   1. STT  : browser-native SpeechRecognition (Chrome/Edge). No gateway needed.
- *   2. Chat : POST /api/voice/chat → grounded Gemini/Codex answer.
+ *   2. Chat : POST /api/voice/chat → grounded Codex answer.
  *   3. TTS  : browser-native speechSynthesis (with optional gateway upgrade).
  *
  * Press-and-hold the orb (or tap to toggle) to talk. Interim transcript shows

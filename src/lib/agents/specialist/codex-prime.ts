@@ -3,7 +3,7 @@
  *
  * When a specialist agent says "I need to compute X on the user's data," it calls
  * `runSkill()` here. Codex Prime:
- *   1) selects an LLM engine (Gemini default, Codex fallback when key present),
+ *   1) calls the Codex engine (the only engine),
  *   2) streams Python token-by-token into the run's event log,
  *   3) commits the resulting source to the skill library (Supabase) with a bumped
  *      version number, an input hash, and a duration measurement,

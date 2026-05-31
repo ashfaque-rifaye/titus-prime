@@ -1,15 +1,14 @@
 /**
  * POST /api/codex/stream
  *
- * Workshop-pane streaming endpoint. Powered by the dual-engine LLM service:
- * Gemini 2.5 Flash by default, Codex automatic-fallback when CODEX_API_KEY is
- * configured. The body shape is unchanged so the existing Workshop component
- * keeps working without modification.
+ * Workshop-pane streaming endpoint. Powered by Codex — the single AI engine.
+ * Streams Codex tokens to the Workshop pane as it writes Python. The body shape
+ * is unchanged so the existing Workshop component keeps working without changes.
  *
- * Body: { agent: string, intent: string, context?: string, engine?: "gemini"|"codex" }
+ * Body: { agent: string, intent: string, context?: string }
  */
 import { createFileRoute } from "@tanstack/react-router";
-import { selectProvider, streamWithFallback, type LlmEngine } from "@/lib/llm";
+import { selectProvider, streamWithFallback } from "@/lib/llm";
 
 const SYSTEM = `You are Codex Prime, the shared coding agent inside Titus-Prime — an
 autonomous financial operations system. You are called by specialist agents to
@@ -31,7 +30,6 @@ export const Route = createFileRoute("/api/codex/stream")({
           agent?: string;
           intent?: string;
           context?: string;
-          engine?: LlmEngine;
         };
         const agent = body.agent ?? "Specialist Agent";
         const intent = body.intent ?? "Generate skill";
@@ -47,7 +45,7 @@ export const Route = createFileRoute("/api/codex/stream")({
           .filter(Boolean)
           .join("\n");
 
-        const { active } = selectProvider(body.engine);
+        const { active } = selectProvider();
 
         const stream = new ReadableStream<Uint8Array>({
           async start(controller) {
@@ -59,23 +57,18 @@ export const Route = createFileRoute("/api/codex/stream")({
               send({ choices: [{ delta: { content: text } }], engine });
 
             try {
-              for await (const chunk of streamWithFallback(
-                {
-                  messages: [
-                    { role: "system", content: SYSTEM },
-                    { role: "user", content: userPrompt },
-                  ],
-                  maxTokens: 1400,
-                  temperature: 0.3,
-                  trace: `workshop.${agent}`,
-                },
-                body.engine,
-              )) {
+              for await (const chunk of streamWithFallback({
+                messages: [
+                  { role: "system", content: SYSTEM },
+                  { role: "user", content: userPrompt },
+                ],
+                maxTokens: 1400,
+                temperature: 0.3,
+                trace: `workshop.${agent}`,
+              })) {
                 if (chunk.type === "delta") sendDelta(chunk.text, chunk.engine);
                 else if (chunk.type === "error") {
                   sendDelta(`\n# stream-error[${chunk.engine}]: ${chunk.message}\n`, chunk.engine);
-                } else if (chunk.type === "done") {
-                  // continue — outer loop ends naturally
                 }
               }
               controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
