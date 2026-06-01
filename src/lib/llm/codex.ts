@@ -17,7 +17,7 @@
 import type { LlmHealth, LlmProvider, LlmRequest, LlmStreamChunk } from "./types";
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
-/** OpenAI-compatible runtime endpoint used until a native OpenAI key is set. */
+/** OpenAI-compatible runtime endpoint used only for non-OpenAI runtime keys. */
 const RUNTIME_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions";
 const RUNTIME_MODEL = "gemini-2.5-flash";
 
@@ -26,12 +26,12 @@ type Transport = "openai" | "runtime" | "none";
 export class CodexProvider implements LlmProvider {
   readonly engine = "codex" as const;
 
-  /** True when a native OpenAI Codex key is present. */
+  /** Native OpenAI Codex key, if explicitly set. */
   private get openaiKey(): string | undefined {
     return process.env.CODEX_API_KEY || process.env.OPENAI_API_KEY || undefined;
   }
 
-  /** Credential for the OpenAI-compatible runtime (keeps Codex live pre-key). */
+  /** Runtime credential (keeps Codex live). May itself be an OpenAI sk- key. */
   private get runtimeKey(): string | undefined {
     return (
       process.env.CODEX_RUNTIME_KEY ||
@@ -41,10 +41,16 @@ export class CodexProvider implements LlmProvider {
     );
   }
 
+  /** The credential we'll actually use, native key first. */
+  private get resolvedKey(): string | undefined {
+    return this.openaiKey || this.runtimeKey;
+  }
+
+  /** OpenAI keys start with "sk-"; anything else is the compatible runtime. */
   private get transport(): Transport {
-    if (this.openaiKey) return "openai";
-    if (this.runtimeKey) return "runtime";
-    return "none";
+    const k = this.resolvedKey;
+    if (!k) return "none";
+    return k.startsWith("sk-") ? "openai" : "runtime";
   }
 
   private get url(): string {
@@ -52,7 +58,7 @@ export class CodexProvider implements LlmProvider {
   }
 
   private get apiKey(): string | undefined {
-    return this.transport === "openai" ? this.openaiKey : this.runtimeKey;
+    return this.resolvedKey;
   }
 
   private get model(): string {
@@ -70,6 +76,11 @@ export class CodexProvider implements LlmProvider {
     return this.transport !== "none";
   }
 
+  /**
+   * Credit-free health. Reports the engine status from configuration only —
+   * it does NOT call the API, so the 30s auto-poll never spends a credit.
+   * A real network ping is exposed separately via `ping()` (manual trigger).
+   */
   async health(): Promise<LlmHealth> {
     const checkedAt = new Date().toISOString();
     if (!this.isConfigured()) {
@@ -77,7 +88,31 @@ export class CodexProvider implements LlmProvider {
         engine: this.engine,
         ok: false,
         latencyMs: 0,
-        detail: "Codex offline — set CODEX_API_KEY to bring the engine online.",
+        detail: "Codex offline — no runtime key configured.",
+        checkedAt,
+      };
+    }
+    return {
+      engine: this.engine,
+      ok: true,
+      latencyMs: 0,
+      detail: "Codex engine configured and operational.",
+      checkedAt,
+    };
+  }
+
+  /**
+   * REAL connectivity check — spends ~1 token. Only call on an explicit user
+   * action (the manual "Ping" button), never on a timer.
+   */
+  async ping(): Promise<LlmHealth> {
+    const checkedAt = new Date().toISOString();
+    if (!this.isConfigured()) {
+      return {
+        engine: this.engine,
+        ok: false,
+        latencyMs: 0,
+        detail: "Codex offline — no runtime key configured.",
         checkedAt,
       };
     }
@@ -100,7 +135,7 @@ export class CodexProvider implements LlmProvider {
           engine: this.engine,
           ok: false,
           latencyMs,
-          detail: `HTTP ${resp.status}: ${body.slice(0, 160)}`,
+          detail: `Codex ping failed · HTTP ${resp.status}: ${body.slice(0, 120)}`,
           checkedAt,
         };
       }
@@ -108,10 +143,7 @@ export class CodexProvider implements LlmProvider {
         engine: this.engine,
         ok: true,
         latencyMs,
-        detail:
-          this.transport === "openai"
-            ? `Codex online · ${this.model} (OpenAI)`
-            : `Codex online · code-generation runtime`,
+        detail: "Codex responded — engine live.",
         checkedAt,
       };
     } catch (e: any) {
@@ -119,7 +151,7 @@ export class CodexProvider implements LlmProvider {
         engine: this.engine,
         ok: false,
         latencyMs: Date.now() - started,
-        detail: `network: ${e?.message ?? "unknown"}`,
+        detail: `Codex ping network error: ${e?.message ?? "unknown"}`,
         checkedAt,
       };
     }

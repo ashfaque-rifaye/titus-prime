@@ -25,6 +25,7 @@ import { Route as ApiValueRealizeRouteImport } from './routes/api/value.realize'
 import { Route as ApiValueOutcomesRouteImport } from './routes/api/value.outcomes'
 import { Route as ApiValueAnomaliesRouteImport } from './routes/api/value.anomalies'
 import { Route as ApiTreasuryProjectionRouteImport } from './routes/api/treasury.projection'
+import { Route as ApiLlmPingRouteImport } from './routes/api/llm.ping'
 import { Route as ApiLlmHealthRouteImport } from './routes/api/llm.health'
 import { Route as ApiEmailComposeRouteImport } from './routes/api/email.compose'
 import { Route as ApiCsvIngestRouteImport } from './routes/api/csv.ingest'
@@ -116,6 +117,11 @@ const ApiTreasuryProjectionRoute = ApiTreasuryProjectionRouteImport.update({
   path: '/api/treasury/projection',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiLlmPingRoute = ApiLlmPingRouteImport.update({
+  id: '/api/llm/ping',
+  path: '/api/llm/ping',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiLlmHealthRoute = ApiLlmHealthRouteImport.update({
   id: '/api/llm/health',
   path: '/api/llm/health',
@@ -185,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/api/csv/ingest': typeof ApiCsvIngestRoute
   '/api/email/compose': typeof ApiEmailComposeRoute
   '/api/llm/health': typeof ApiLlmHealthRoute
+  '/api/llm/ping': typeof ApiLlmPingRoute
   '/api/treasury/projection': typeof ApiTreasuryProjectionRoute
   '/api/value/anomalies': typeof ApiValueAnomaliesRoute
   '/api/value/outcomes': typeof ApiValueOutcomesRoute
@@ -213,6 +220,7 @@ export interface FileRoutesByTo {
   '/api/csv/ingest': typeof ApiCsvIngestRoute
   '/api/email/compose': typeof ApiEmailComposeRoute
   '/api/llm/health': typeof ApiLlmHealthRoute
+  '/api/llm/ping': typeof ApiLlmPingRoute
   '/api/treasury/projection': typeof ApiTreasuryProjectionRoute
   '/api/value/anomalies': typeof ApiValueAnomaliesRoute
   '/api/value/outcomes': typeof ApiValueOutcomesRoute
@@ -242,6 +250,7 @@ export interface FileRoutesById {
   '/api/csv/ingest': typeof ApiCsvIngestRoute
   '/api/email/compose': typeof ApiEmailComposeRoute
   '/api/llm/health': typeof ApiLlmHealthRoute
+  '/api/llm/ping': typeof ApiLlmPingRoute
   '/api/treasury/projection': typeof ApiTreasuryProjectionRoute
   '/api/value/anomalies': typeof ApiValueAnomaliesRoute
   '/api/value/outcomes': typeof ApiValueOutcomesRoute
@@ -272,6 +281,7 @@ export interface FileRouteTypes {
     | '/api/csv/ingest'
     | '/api/email/compose'
     | '/api/llm/health'
+    | '/api/llm/ping'
     | '/api/treasury/projection'
     | '/api/value/anomalies'
     | '/api/value/outcomes'
@@ -300,6 +310,7 @@ export interface FileRouteTypes {
     | '/api/csv/ingest'
     | '/api/email/compose'
     | '/api/llm/health'
+    | '/api/llm/ping'
     | '/api/treasury/projection'
     | '/api/value/anomalies'
     | '/api/value/outcomes'
@@ -328,6 +339,7 @@ export interface FileRouteTypes {
     | '/api/csv/ingest'
     | '/api/email/compose'
     | '/api/llm/health'
+    | '/api/llm/ping'
     | '/api/treasury/projection'
     | '/api/value/anomalies'
     | '/api/value/outcomes'
@@ -357,6 +369,7 @@ export interface RootRouteChildren {
   ApiCsvIngestRoute: typeof ApiCsvIngestRoute
   ApiEmailComposeRoute: typeof ApiEmailComposeRoute
   ApiLlmHealthRoute: typeof ApiLlmHealthRoute
+  ApiLlmPingRoute: typeof ApiLlmPingRoute
   ApiTreasuryProjectionRoute: typeof ApiTreasuryProjectionRoute
   ApiValueAnomaliesRoute: typeof ApiValueAnomaliesRoute
   ApiValueOutcomesRoute: typeof ApiValueOutcomesRoute
@@ -482,6 +495,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTreasuryProjectionRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/llm/ping': {
+      id: '/api/llm/ping'
+      path: '/api/llm/ping'
+      fullPath: '/api/llm/ping'
+      preLoaderRoute: typeof ApiLlmPingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/llm/health': {
       id: '/api/llm/health'
       path: '/api/llm/health'
@@ -573,6 +593,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCsvIngestRoute: ApiCsvIngestRoute,
   ApiEmailComposeRoute: ApiEmailComposeRoute,
   ApiLlmHealthRoute: ApiLlmHealthRoute,
+  ApiLlmPingRoute: ApiLlmPingRoute,
   ApiTreasuryProjectionRoute: ApiTreasuryProjectionRoute,
   ApiValueAnomaliesRoute: ApiValueAnomaliesRoute,
   ApiValueOutcomesRoute: ApiValueOutcomesRoute,

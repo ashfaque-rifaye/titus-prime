@@ -26,7 +26,7 @@ export function selectProvider(_preferred?: LlmEngine): {
   };
 }
 
-/** Health check for the Codex engine. Logs a clean ASCII block to the console. */
+/** Health check for the Codex engine — credit-free (no API call). */
 export async function healthAll(): Promise<{
   primary: LlmEngine;
   fallback: LlmEngine;
@@ -36,8 +36,8 @@ export async function healthAll(): Promise<{
   const c = await codex.health();
 
   const lines = [
-    "── Codex health check ─────────────────────────────────",
-    `  Codex  ${c.ok ? "✓" : "✗"}  ${c.latencyMs}ms  ${c.detail}`,
+    "── Codex health (config-only, no API call) ────────────",
+    `  Codex  ${c.ok ? "✓" : "✗"}  ${c.detail}`,
     `  Engine → codex`,
     "──────────────────────────────────────────────────────",
   ].join("\n");
@@ -50,6 +50,21 @@ export async function healthAll(): Promise<{
     active: "codex",
     results: [c],
   };
+}
+
+/**
+ * REAL Codex connectivity ping — spends ~1 token. Only invoked from the manual
+ * "Ping" action in the header, never on a timer.
+ */
+export async function pingCodex(): Promise<{
+  primary: LlmEngine;
+  fallback: LlmEngine;
+  active: LlmEngine;
+  results: LlmHealth[];
+}> {
+  const c = await codex.ping();
+  console.log(`── Codex ping (live) ──  ${c.ok ? "✓" : "✗"}  ${c.latencyMs}ms  ${c.detail}`);
+  return { primary: "codex", fallback: "codex", active: "codex", results: [c] };
 }
 
 /** Stream from Codex. (No cascade — Codex is the only engine.) */
@@ -66,5 +81,6 @@ export const llm = {
   codex,
   select: selectProvider,
   healthAll,
+  pingCodex,
   streamWithFallback,
 };

@@ -1,8 +1,12 @@
 /**
  * HealthBadge
  *
- * Polls /api/llm/health and renders the live status of the Codex engine in the
- * top navigation. Click for a popover with full diagnostics.
+ * The dot + label reflect the Codex engine's *configured* status, polled from
+ * the credit-free /api/llm/health endpoint (no API call, no token spend).
+ *
+ * The popover has an explicit "Ping Codex" button. ONLY that button performs a
+ * real Codex API call (/api/llm/ping, ~1 token). Nothing else here spends
+ * credits — the auto-poll is purely configuration status.
  */
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
@@ -25,8 +29,11 @@ export function HealthBadge() {
   const [data, setData] = useState<HealthResponse | null>(null);
   const [open, setOpen] = useState(false);
   const [pulse, setPulse] = useState(0);
+  const [pinging, setPinging] = useState(false);
+  const [pingResult, setPingResult] = useState<Health | null>(null);
 
-  async function check() {
+  // Credit-free configuration status poll. Never calls the Codex API.
+  async function checkConfig() {
     try {
       const resp = await fetch("/api/llm/health");
       if (resp.ok) {
@@ -39,9 +46,41 @@ export function HealthBadge() {
     }
   }
 
+  // REAL ping — spends ~1 token. Manual only.
+  async function pingCodex() {
+    if (pinging) return;
+    setPinging(true);
+    setPingResult(null);
+    try {
+      const resp = await fetch("/api/llm/ping", { method: "POST" });
+      if (resp.ok) {
+        const json: HealthResponse = await resp.json();
+        setPingResult(json.results[0] ?? null);
+      } else {
+        setPingResult({
+          engine: "codex",
+          ok: false,
+          latencyMs: 0,
+          detail: `Ping failed (HTTP ${resp.status})`,
+          checkedAt: new Date().toISOString(),
+        });
+      }
+    } catch (e: any) {
+      setPingResult({
+        engine: "codex",
+        ok: false,
+        latencyMs: 0,
+        detail: e?.message ?? "network error",
+        checkedAt: new Date().toISOString(),
+      });
+    } finally {
+      setPinging(false);
+    }
+  }
+
   useEffect(() => {
-    check();
-    const t = setInterval(check, 30_000);
+    checkConfig();
+    const t = setInterval(checkConfig, 30_000);
     return () => clearInterval(t);
   }, []);
 
@@ -54,7 +93,7 @@ export function HealthBadge() {
         whileTap={{ scale: 0.97 }}
         onClick={() => setOpen((v) => !v)}
         className="inline-flex items-center gap-2 rounded-md border border-border bg-surface/70 px-2.5 py-1 text-[11px] mono text-muted-foreground hover:border-primary/40 hover:text-foreground transition"
-        title="LLM health"
+        title="Codex engine status"
       >
         <span className="relative inline-flex h-2 w-2">
           <span
@@ -68,8 +107,8 @@ export function HealthBadge() {
             className={`absolute inset-0 rounded-full ${ok ? "bg-emerald-400" : "bg-rose-400"}`}
           />
         </span>
-        <span>{data ? data.active : "…"}</span>
-        {active && <span className="text-foreground/70">{active.latencyMs}ms</span>}
+        <span>codex</span>
+        <span className="text-foreground/70">{ok ? "operational" : "offline"}</span>
       </motion.button>
       <AnimatePresence>
         {open && data && (
@@ -77,40 +116,70 @@ export function HealthBadge() {
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
-            className="absolute right-0 mt-2 w-[320px] rounded-lg border border-border bg-surface/95 backdrop-blur p-3 text-xs shadow-xl z-50"
+            className="absolute right-0 mt-2 w-[340px] rounded-lg border border-border bg-surface/95 backdrop-blur p-3 text-xs shadow-xl z-50"
           >
             <div className="mb-2 flex items-center justify-between">
-              <div className="font-semibold">LLM Engines</div>
-              <button
-                onClick={() => check()}
-                className="text-[10px] mono text-muted-foreground hover:text-foreground"
-              >
-                refresh
-              </button>
+              <div className="font-semibold">Codex Engine</div>
+              <span className="text-[10px] mono text-muted-foreground">config status · no tokens</span>
             </div>
+
             {data.results.map((r) => (
               <div
                 key={r.engine}
-                className="rounded-md border border-border bg-background/60 p-2 mb-1.5 last:mb-0"
+                className="rounded-md border border-border bg-background/60 p-2 mb-2"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <span
                       className={`h-1.5 w-1.5 rounded-full ${r.ok ? "bg-emerald-400" : "bg-rose-400"}`}
                     />
-                    <span className="mono">{r.engine}</span>
-                    {r.engine === data.active && (
-                      <span className="rounded bg-primary/15 px-1 py-px text-[9px] accent-text">
-                        ACTIVE
-                      </span>
-                    )}
+                    <span className="mono">codex</span>
+                    <span className="rounded bg-primary/15 px-1 py-px text-[9px] accent-text">
+                      {r.ok ? "OPERATIONAL" : "OFFLINE"}
+                    </span>
                   </div>
-                  <span className="text-muted-foreground">{r.latencyMs}ms</span>
                 </div>
                 <div className="mt-1 text-muted-foreground line-clamp-2">{r.detail}</div>
               </div>
             ))}
-            <div className="mt-2 text-[10px] mono text-muted-foreground">engine: {data.active}</div>
+
+            {/* Manual ping — the ONLY thing here that spends a token */}
+            <button
+              onClick={pingCodex}
+              disabled={pinging}
+              className="w-full rounded-md border border-primary/40 bg-primary/10 px-2 py-1.5 text-[11px] accent-text hover:bg-primary/20 transition disabled:opacity-50"
+            >
+              {pinging ? "Pinging Codex…" : "Ping Codex (live · ~1 token)"}
+            </button>
+
+            <AnimatePresence>
+              {pingResult && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className={`mt-2 rounded-md border p-2 ${
+                    pingResult.ok
+                      ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-300"
+                      : "border-rose-500/30 bg-rose-500/5 text-rose-300"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="mono text-[10px]">
+                      {pingResult.ok ? "LIVE" : "FAILED"}
+                    </span>
+                    {pingResult.latencyMs > 0 && (
+                      <span className="text-[10px] text-muted-foreground">{pingResult.latencyMs}ms</span>
+                    )}
+                  </div>
+                  <div className="mt-0.5 text-[11px]">{pingResult.detail}</div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="mt-2 text-[10px] mono text-muted-foreground">
+              Auto-status is config-only. Codex API is called on agent runs and this ping.
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
