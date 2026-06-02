@@ -132,7 +132,101 @@ export type Scoreboard = {
   recentEvents: { id: string; label: string; amountUsd: number; status: string; agent: string }[];
 };
 
+/**
+ * Seed the ledger from the current snapshot WITHOUT running the LLM.
+ *
+ * The scoreboard should never be blank just because the user hasn't manually
+ * triggered a sweep this session (the in-memory store resets on restart). This
+ * recomputes the projected value of every action the agents would propose,
+ * using the same valuation rules as a real run — but with zero token spend.
+ *
+ * Idempotent: keyed by ref+label via recordValueOnce, so calling it repeatedly
+ * (or before a real sweep) never double-counts.
+ */
+export async function seedScoreboardFromSnapshot(): Promise<void> {
+  // Import lazily to avoid a circular dependency (agents import the ledger).
+  const { deriveView } = await import("../snapshot-adapter.server");
+  const view = await deriveView();
+
+  const MIN: Record<ValueCategory, number> = {
+    protected: 90,
+    recovered: 12,
+    saved: 20,
+    time: 0,
+  };
+
+  // Treasury: a projected crunch protected.
+  const crunch = view.projection.find((p) => p.balance < 5000);
+  if (crunch) {
+    const shortfall = Math.max(0, 5000 - crunch.balance);
+    await recordValueOnce({
+      agent: "treasury",
+      category: "protected",
+      amountUsd: shortfall,
+      minutesSaved: MIN.protected,
+      label: `Survival plan for Day ${crunch.day} crunch`,
+      ref: `crunch_day_${crunch.day}`,
+    });
+  }
+
+  // Collection: each overdue invoice is recoverable AR.
+  for (const inv of view.invoices.filter((i) => i.daysLate > 0)) {
+    await recordValueOnce({
+      agent: "collection",
+      category: "recovered",
+      amountUsd: inv.amount,
+      minutesSaved: MIN.recovered,
+      label: `Reminder · ${inv.customer} · ${inv.id}`,
+      ref: inv.id,
+    });
+  }
+
+  // Subscription: cancellable non-essential renewals = annual spend saved.
+  for (const s of view.subscriptions.filter((x) => !x.essential && x.cancelWindowClosesIn <= 30)) {
+    await recordValueOnce({
+      agent: "subscription",
+      category: "saved",
+      amountUsd: s.annualCost,
+      minutesSaved: MIN.saved,
+      label: `Cancel ${s.vendor} · saves $${s.annualCost.toLocaleString()}/yr`,
+      ref: `sub_${s.id}`,
+    });
+  }
+
+  // Subscription: early-pay vendor discounts.
+  for (const v of view.vendors.filter((x) => x.discountPct > 0)) {
+    await recordValueOnce({
+      agent: "subscription",
+      category: "saved",
+      amountUsd: Math.round(v.amount * (v.discountPct / 100)),
+      minutesSaved: 10,
+      label: `Early-pay ${v.name} · ${v.discountPct}% discount`,
+      ref: `vendor_${v.id}`,
+    });
+  }
+
+  // Tax: penalty avoidance on crossed-nexus states.
+  for (const st of view.stateRevenue.filter((x) => x.nexusCrossed && x.taxOwed > 0)) {
+    await recordValueOnce({
+      agent: "tax",
+      category: "protected",
+      amountUsd: st.taxOwed,
+      minutesSaved: 120,
+      label: `${st.state} sales-tax filing · $${st.taxOwed.toFixed(2)}`,
+      ref: `tax_${st.state}`,
+    });
+  }
+}
+
 export async function getScoreboard(): Promise<Scoreboard> {
+  // Auto-seed on first request so the scoreboard is never blank after a restart.
+  if (memo().length === 0) {
+    try {
+      await seedScoreboardFromSnapshot();
+    } catch {
+      /* snapshot not ready yet — scoreboard will show empty-state, that's fine */
+    }
+  }
   const events = await listValueEvents(500);
   const sb: Scoreboard = {
     protectedUsd: 0,
